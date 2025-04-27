@@ -1,11 +1,12 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { lazy } from "react";
 
-// Lazy load components for better performance
+// Lazy-loaded components
 const Dashboard = lazy(() => import("../pages/Dashboard"));
 const Clients = lazy(() => import("../pages/Clients"));
 const Projects = lazy(() => import("../pages/Projects"));
 const Interactions = lazy(() => import("../pages/Interactions"));
+const Reminders = lazy(() => import("../pages/Reminders"));
 const Login = lazy(() => import("../pages/auth/Login"));
 const Register = lazy(() => import("../pages/auth/Register"));
 const ComingSoon = lazy(() => import("../components/common/ComingSoon"));
@@ -85,7 +86,7 @@ export const privateRoutes: RouteConfig[] = [
   },
   {
     path: "/reminders",
-    component: ComingSoon,
+    component: Reminders,
     type: RouteType.PRIVATE,
     exact: true,
     title: "Reminders",
