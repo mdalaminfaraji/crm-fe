@@ -1,33 +1,39 @@
-import { ReactNode, useEffect } from 'react';
-import { FiX } from 'react-icons/fi';
+import { ReactNode, useEffect } from "react";
+import { FiX } from "react-icons/fi";
 
 interface ModalProps {
   isOpen: boolean;
   onClose: () => void;
   title: string;
   children: ReactNode;
-  size?: 'sm' | 'md' | 'lg' | 'xl';
+  size?: "sm" | "md" | "lg" | "xl";
 }
 
-const Modal = ({ isOpen, onClose, title, children, size = 'md' }: ModalProps) => {
+const Modal = ({
+  isOpen,
+  onClose,
+  title,
+  children,
+  size = "md",
+}: ModalProps) => {
   // Close modal when Escape key is pressed
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
-      if (e.key === 'Escape' && isOpen) {
+      if (e.key === "Escape" && isOpen) {
         onClose();
       }
     };
 
-    window.addEventListener('keydown', handleEscape);
-    
+    window.addEventListener("keydown", handleEscape);
+
     // Prevent scrolling when modal is open
     if (isOpen) {
-      document.body.style.overflow = 'hidden';
+      document.body.style.overflow = "hidden";
     }
 
     return () => {
-      window.removeEventListener('keydown', handleEscape);
-      document.body.style.overflow = 'auto';
+      window.removeEventListener("keydown", handleEscape);
+      document.body.style.overflow = "auto";
     };
   }, [isOpen, onClose]);
 
@@ -37,26 +43,31 @@ const Modal = ({ isOpen, onClose, title, children, size = 'md' }: ModalProps) =>
   // Determine modal width based on size prop
   const getModalWidth = () => {
     switch (size) {
-      case 'sm': return 'max-w-md';
-      case 'md': return 'max-w-lg';
-      case 'lg': return 'max-w-2xl';
-      case 'xl': return 'max-w-4xl';
-      default: return 'max-w-lg';
+      case "sm":
+        return "max-w-md";
+      case "md":
+        return "max-w-lg";
+      case "lg":
+        return "max-w-2xl";
+      case "xl":
+        return "max-w-4xl";
+      default:
+        return "max-w-lg";
     }
   };
 
   return (
     <div className="fixed inset-0 z-50 overflow-y-auto">
       {/* Backdrop */}
-      <div 
-        className="fixed inset-0 bg-black bg-opacity-50 transition-opacity"
+      <div
+        className="fixed inset-0 bg-black/20 bg-opacity-50 transition-opacity"
         onClick={onClose}
         aria-hidden="true"
       ></div>
 
       {/* Modal */}
       <div className="flex items-center justify-center min-h-screen p-4">
-        <div 
+        <div
           className={`${getModalWidth()} w-full bg-white dark:bg-gray-800 rounded-lg shadow-xl transform transition-all relative`}
           onClick={(e) => e.stopPropagation()}
         >
@@ -76,9 +87,7 @@ const Modal = ({ isOpen, onClose, title, children, size = 'md' }: ModalProps) =>
           </div>
 
           {/* Content */}
-          <div className="px-6 py-4">
-            {children}
-          </div>
+          <div className="px-6 py-4">{children}</div>
         </div>
       </div>
     </div>

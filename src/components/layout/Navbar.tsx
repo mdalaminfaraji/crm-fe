@@ -1,8 +1,8 @@
-import { useState, useEffect, useRef } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { FiMenu, FiBell, FiUser, FiLogOut, FiSettings } from 'react-icons/fi';
-import ThemeToggle from '../common/ThemeToggle';
-import { useAuth } from '../../hooks/useAuth';
+import { useState, useEffect, useRef } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { FiMenu, FiBell, FiUser, FiLogOut, FiSettings } from "react-icons/fi";
+import ThemeToggle from "../common/ThemeToggle";
+import { useAuth } from "../../hooks/useAuth";
 
 interface NavbarProps {
   toggleSidebar: () => void;
@@ -14,29 +14,35 @@ const Navbar = ({ toggleSidebar, isMobile }: NavbarProps) => {
   const [notificationsOpen, setNotificationsOpen] = useState(false);
   const { user, logout } = useAuth();
   const navigate = useNavigate();
-  
+
   const profileRef = useRef<HTMLDivElement>(null);
   const notificationsRef = useRef<HTMLDivElement>(null);
-  
+
   const handleLogout = async () => {
     await logout();
-    navigate('/login');
+    navigate("/login");
   };
 
   // Close dropdowns when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (profileRef.current && !profileRef.current.contains(event.target as Node)) {
+      if (
+        profileRef.current &&
+        !profileRef.current.contains(event.target as Node)
+      ) {
         setProfileOpen(false);
       }
-      if (notificationsRef.current && !notificationsRef.current.contains(event.target as Node)) {
+      if (
+        notificationsRef.current &&
+        !notificationsRef.current.contains(event.target as Node)
+      ) {
         setNotificationsOpen(false);
       }
     };
 
-    document.addEventListener('mousedown', handleClickOutside);
+    document.addEventListener("mousedown", handleClickOutside);
     return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener("mousedown", handleClickOutside);
     };
   }, []);
 
@@ -46,14 +52,11 @@ const Navbar = ({ toggleSidebar, isMobile }: NavbarProps) => {
         <div className="flex items-center">
           <button
             onClick={toggleSidebar}
-            className="text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-200 dark:focus:ring-gray-700 transition-colors mr-2"
+            className="text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-200 dark:focus:ring-gray-700 transition-colors mr-2 md:hidden"
             aria-label="Toggle sidebar"
           >
             <FiMenu className="h-5 w-5" />
           </button>
-          <h1 className="text-xl font-semibold text-gray-800 dark:text-white md:block hidden">
-            Mini-CRM
-          </h1>
         </div>
 
         <div className="flex items-center space-x-2 md:space-x-4">
@@ -70,12 +73,14 @@ const Navbar = ({ toggleSidebar, isMobile }: NavbarProps) => {
               <FiBell className="h-5 w-5" />
               <span className="absolute top-1 right-1 h-2 w-2 rounded-full bg-red-500"></span>
             </button>
-            
+
             {/* Notifications dropdown */}
             {notificationsOpen && (
               <div className="absolute right-0 mt-2 w-80 bg-white dark:bg-gray-800 rounded-md shadow-lg py-1 z-10 max-h-96 overflow-y-auto">
                 <div className="px-4 py-2 border-b border-gray-200 dark:border-gray-700">
-                  <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300">Notifications</h3>
+                  <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                    Notifications
+                  </h3>
                 </div>
                 <div className="p-4 text-sm text-gray-500 dark:text-gray-400 text-center">
                   No new notifications
@@ -95,7 +100,7 @@ const Navbar = ({ toggleSidebar, isMobile }: NavbarProps) => {
                 <FiUser className="h-5 w-5 text-gray-600 dark:text-gray-300" />
               </div>
               <span className="ml-2 text-sm font-medium text-gray-700 dark:text-gray-300 hidden md:block">
-                {user?.firstName || 'User'}
+                {user?.firstName || "User"}
               </span>
             </button>
 
@@ -103,8 +108,12 @@ const Navbar = ({ toggleSidebar, isMobile }: NavbarProps) => {
             {profileOpen && (
               <div className="absolute right-0 mt-2 w-56 bg-white dark:bg-gray-800 rounded-md shadow-lg py-1 z-10">
                 <div className="px-4 py-2 text-sm text-gray-700 dark:text-gray-300 border-b border-gray-200 dark:border-gray-700">
-                  <p className="font-medium">{user?.firstName} {user?.lastName}</p>
-                  <p className="text-xs text-gray-500 dark:text-gray-400 truncate">{user?.email}</p>
+                  <p className="font-medium">
+                    {user?.firstName} {user?.lastName}
+                  </p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
+                    {user?.email}
+                  </p>
                 </div>
                 <Link
                   to="/profile"
@@ -125,7 +134,9 @@ const Navbar = ({ toggleSidebar, isMobile }: NavbarProps) => {
                 {/* Show theme toggle on mobile */}
                 {isMobile && (
                   <div className="px-4 py-2 flex items-center justify-between border-t border-gray-200 dark:border-gray-700">
-                    <span className="text-sm text-gray-700 dark:text-gray-300">Dark Mode</span>
+                    <span className="text-sm text-gray-700 dark:text-gray-300">
+                      Dark Mode
+                    </span>
                     <ThemeToggle />
                   </div>
                 )}
