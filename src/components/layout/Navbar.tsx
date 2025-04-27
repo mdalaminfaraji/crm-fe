@@ -20,7 +20,7 @@ const Navbar = ({ toggleSidebar }: NavbarProps) => {
   };
 
   return (
-    <nav className="bg-white dark:bg-gray-800 shadow-sm">
+    <nav className="themed-nav shadow-sm">
       <div className="px-4 py-3 flex justify-between items-center">
         <div className="flex items-center">
           <button

@@ -6,15 +6,15 @@ interface ThemeProviderProps {
 }
 
 export const ThemeProvider = ({ children }: ThemeProviderProps) => {
-  // Check if user has a theme preference in localStorage or use system preference
+  // Get initial theme from localStorage or system preference
   const getInitialTheme = (): Theme => {
-    // For SSR/SSG, window might not be available
+    // For SSR safety
     if (typeof window === 'undefined') return 'light';
     
-    const savedTheme = localStorage.getItem('theme') as Theme | null;
-    
-    if (savedTheme && (savedTheme === 'dark' || savedTheme === 'light')) {
-      return savedTheme;
+    // Check localStorage first
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme === 'dark' || savedTheme === 'light') {
+      return savedTheme as Theme;
     }
     
     // Check system preference
@@ -22,61 +22,81 @@ export const ThemeProvider = ({ children }: ThemeProviderProps) => {
       return 'dark';
     }
     
+    // Default to light
     return 'light';
   };
 
+  // Initialize state with a function to avoid execution during SSR
   const [theme, setTheme] = useState<Theme>(getInitialTheme);
   const [mounted, setMounted] = useState(false);
-
-  // Listen for system theme changes
+  
+  // Apply theme to document
+  const applyTheme = (newTheme: Theme) => {
+    // Get the root HTML element
+    const root = document.documentElement;
+    
+    // Remove both theme classes
+    root.classList.remove('light', 'dark');
+    
+    // Add the new theme class
+    root.classList.add(newTheme);
+    
+    // Store the theme preference
+    localStorage.setItem('theme', newTheme);
+    
+    // Apply transition styles to body
+    document.body.style.transition = 'var(--theme-transition)';
+    
+    console.log('Applied theme:', newTheme, 'HTML classes:', root.classList.toString());
+  };
+  
+  // Toggle theme function
+  const toggleTheme = () => {
+    const newTheme = theme === 'light' ? 'dark' : 'light';
+    setTheme(newTheme);
+    applyTheme(newTheme);
+    console.log('Theme toggled to:', newTheme);
+  };
+  
+  // Apply theme when it changes
   useEffect(() => {
+    if (mounted) {
+      applyTheme(theme);
+    }
+  }, [theme, mounted]);
+  
+  // Handle initial setup and system preference changes
+  useEffect(() => {
+    // Mark as mounted
+    setMounted(true);
+    
+    // Apply initial theme immediately
+    applyTheme(getInitialTheme());
+    
+    // Listen for system theme changes
     const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
     
     const handleChange = (e: MediaQueryListEvent) => {
-      // Only update theme if user hasn't explicitly set a preference
       if (!localStorage.getItem('theme')) {
-        setTheme(e.matches ? 'dark' : 'light');
+        const newTheme = e.matches ? 'dark' : 'light';
+        setTheme(newTheme);
+        applyTheme(newTheme);
       }
     };
     
-    // Modern browsers
+    // Add event listener with browser compatibility
     if (mediaQuery.addEventListener) {
       mediaQuery.addEventListener('change', handleChange);
       return () => mediaQuery.removeEventListener('change', handleChange);
-    } 
-    // Legacy browsers (Safari)
-    else if (mediaQuery.addListener) {
+    } else if (mediaQuery.addListener) {
       mediaQuery.addListener(handleChange);
       return () => mediaQuery.removeListener(handleChange);
     }
   }, []);
-
-  // Apply theme class to document
-  useEffect(() => {
-    const root = window.document.documentElement;
-    
-    // Remove both classes first
-    root.classList.remove('light', 'dark');
-    
-    // Add the current theme class
-    root.classList.add(theme);
-    
-    // Save theme preference to localStorage
-    localStorage.setItem('theme', theme);
-  }, [theme]);
-
-  // After mounting, we have access to the theme
-  useEffect(() => setMounted(true), []);
-
-  const toggleTheme = () => {
-    setTheme(prevTheme => (prevTheme === 'light' ? 'dark' : 'light'));
-  };
-
-  // Prevent flash of incorrect theme
-  const providerValue = { theme, toggleTheme };
   
+  // Prevent flash of wrong theme by rendering children only after mounted
   return (
-    <ThemeContext.Provider value={providerValue}>
+    <ThemeContext.Provider value={{ theme, toggleTheme }}>
       {mounted ? children : null}
     </ThemeContext.Provider>
   );

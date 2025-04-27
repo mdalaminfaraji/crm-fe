@@ -1,7 +1,8 @@
 import "./index.css";
 import { BrowserRouter } from "react-router-dom";
 import { AppRouter } from "./routes";
-import ThemeIndicator from "./components/common/ThemeIndicator";
+import { useTheme } from "./hooks/useTheme";
+import { useEffect } from "react";
 
 /**
  * Main App component
@@ -9,10 +10,18 @@ import ThemeIndicator from "./components/common/ThemeIndicator";
  * Includes theme indicator for dark/light mode feedback
  */
 function App() {
+  const { theme } = useTheme();
+
+  // Apply the theme class to the body element
+  useEffect(() => {
+    document.body.className = `app-body ${theme}`;
+  }, [theme]);
+
   return (
     <BrowserRouter>
-      <AppRouter />
-      <ThemeIndicator />
+      <div className="app-container">
+        <AppRouter />
+      </div>
     </BrowserRouter>
   );
 }
