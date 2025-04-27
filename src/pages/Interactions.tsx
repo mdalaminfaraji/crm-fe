@@ -241,12 +241,18 @@ const Interactions = () => {
 
   // Handle form submission
   const handleSubmitInteraction = async (data: InteractionFormData) => {
-    dispatch({ type: 'SET_SUBMITTING', payload: true });
-
     try {
+      dispatch({ type: 'SET_SUBMITTING', payload: true });
+
+      // Convert Date object to string if it's a Date
+      const formattedData = {
+        ...data,
+        date: data.date instanceof Date ? data.date.toISOString() : data.date
+      };
+
       if (state.currentInteraction) {
         // Update existing interaction
-        const response = await interactionService.update(state.currentInteraction.id, data);
+        const response = await interactionService.update(state.currentInteraction.id, formattedData);
 
         dispatch({ type: 'UPDATE_INTERACTION', payload: response.interaction });
 
@@ -258,7 +264,7 @@ const Interactions = () => {
         });
       } else {
         // Create new interaction
-        const response = await interactionService.create(data);
+        const response = await interactionService.create(formattedData);
 
         dispatch({ type: 'ADD_INTERACTION', payload: response.interaction });
 

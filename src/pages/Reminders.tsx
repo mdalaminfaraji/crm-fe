@@ -257,9 +257,15 @@ const Reminders = () => {
     dispatch({ type: 'SET_SUBMITTING', payload: true });
 
     try {
+      // Convert Date object to string if it's a Date
+      const formattedData = {
+        ...data,
+        dueDate: data.dueDate instanceof Date ? data.dueDate.toISOString() : data.dueDate
+      };
+
       if (state.currentReminder) {
         // Update existing reminder
-        const response = await reminderService.update(state.currentReminder.id, data);
+        const response = await reminderService.update(state.currentReminder.id, formattedData);
 
         dispatch({ type: 'UPDATE_REMINDER', payload: response.reminder });
 
@@ -271,7 +277,7 @@ const Reminders = () => {
         });
       } else {
         // Create new reminder
-        const response = await reminderService.create(data);
+        const response = await reminderService.create(formattedData);
 
         dispatch({ type: 'ADD_REMINDER', payload: response.reminder });
 
