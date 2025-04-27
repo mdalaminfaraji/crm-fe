@@ -35,13 +35,47 @@ export interface ProjectResponse {
   project: Project;
 }
 
+export interface PaginationData {
+  page: number;
+  limit: number;
+  totalCount: number;
+  totalPages: number;
+  hasNextPage: boolean;
+  hasPreviousPage: boolean;
+}
+
 export interface ProjectsResponse {
+  message: string;
   projects: Project[];
+  pagination?: PaginationData;
+}
+
+export interface ProjectSearchParams {
+  page?: number;
+  limit?: number;
+  search?: string;
+  status?: ProjectStatus;
+  clientId?: string;
+  sortBy?: string;
+  sortOrder?: 'asc' | 'desc';
 }
 
 const projectService = {
-  getAll: async (): Promise<ProjectsResponse> => {
-    const response = await apiClient.get("/api/projects");
+  getAll: async (params?: ProjectSearchParams): Promise<ProjectsResponse> => {
+    const queryParams = new URLSearchParams();
+    
+    if (params) {
+      if (params.page) queryParams.append('page', params.page.toString());
+      if (params.limit) queryParams.append('limit', params.limit.toString());
+      if (params.search) queryParams.append('search', params.search);
+      if (params.status) queryParams.append('status', params.status);
+      if (params.clientId) queryParams.append('clientId', params.clientId);
+      if (params.sortBy) queryParams.append('sortBy', params.sortBy);
+      if (params.sortOrder) queryParams.append('sortOrder', params.sortOrder);
+    }
+    
+    const url = `/api/projects${queryParams.toString() ? `?${queryParams.toString()}` : ''}`;
+    const response = await apiClient.get(url);
     return response.data;
   },
 

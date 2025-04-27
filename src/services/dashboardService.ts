@@ -1,22 +1,63 @@
 import apiClient from "./apiClient";
-import { Client } from "./clientService";
-import { Interaction } from "./interactionService";
-import { Project, ProjectStatus } from "./projectService";
-import { Reminder } from "./reminderService";
+import { ProjectStatus } from "./projectService";
+
+// Enhanced interfaces for dashboard data with additional fields needed for display
+export interface DashboardReminder {
+  id: string;
+  title: string;
+  description?: string;
+  dueDate: string;
+  completed: boolean;
+  clientId?: string;
+  clientName?: string;
+  projectId?: string;
+  projectTitle?: string;
+  userId: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface DashboardInteraction {
+  id: string;
+  type: string;
+  description: string;
+  date: string;
+  clientId?: string;
+  clientName?: string;
+  projectId?: string;
+  projectTitle?: string;
+  userId: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface DashboardProject {
+  id: string;
+  title: string;
+  description?: string;
+  status: ProjectStatus;
+  clientId?: string;
+  clientName?: string;
+  deadline?: string;
+  budget?: number;
+  userId: string;
+  createdAt: string;
+  updatedAt: string;
+}
 
 export interface DashboardData {
-  clientsCount: number;
-  projectsCount: number;
+  totalClients: number;
+  totalProjects: number;
   projectsByStatus: Record<ProjectStatus, number>;
-  upcomingReminders: Reminder[];
-  recentInteractions: Interaction[];
-  recentClients: Client[];
-  activeProjects: Project[];
+  upcomingReminders: DashboardReminder[];
+  recentInteractions: DashboardInteraction[];
+  upcomingDeadlines: DashboardProject[];
+  activeProjects: DashboardProject[];
 }
 
 export interface DashboardResponse {
   message: string;
-  data: DashboardData;
+  dashboardData: DashboardData;
 }
 
 const dashboardService = {
