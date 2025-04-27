@@ -171,18 +171,20 @@ const Interactions = () => {
   // Debounce search term to avoid too many API calls
   const debouncedSearchTerm = useDebounce(state.searchTerm, 500);
 
+  // Memoize pagination values to avoid reference issues
+  const paginationPage = state.pagination.page;
+  const paginationLimit = state.pagination.limit;
+
   // Fetch interactions data with search, filter, and pagination
   const fetchInteractions = useCallback(async () => {
     try {
       dispatch({ type: "FETCH_INTERACTIONS_START" });
 
       const searchParams: InteractionSearchParams = {
-        page: state.pagination.page,
-        limit: state.pagination.limit,
+        page: paginationPage,
+        limit: paginationLimit,
         search: debouncedSearchTerm,
-        type:
-          (state.typeFilter as InteractionTypeEnum) ||
-          undefined,
+        type: state.typeFilter as InteractionTypeEnum || undefined,
         sortBy: "date",
         sortOrder: "desc",
       };
@@ -210,16 +212,17 @@ const Interactions = () => {
     }
   }, [
     dispatch,
-    state.pagination.page,
-    state.pagination.limit,
+    paginationPage,
+    paginationLimit,
     debouncedSearchTerm,
     state.typeFilter,
   ]);
 
-  // Load interactions when search term, type filter or pagination changes
+  // Load interactions when component mounts and when dependencies change
   useEffect(() => {
     fetchInteractions();
-  }, [fetchInteractions]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [debouncedSearchTerm, state.typeFilter, paginationPage, paginationLimit]);
 
   // Handle search input change
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {

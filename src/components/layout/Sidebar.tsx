@@ -8,14 +8,17 @@ import {
   FiSettings, 
   FiHelpCircle,
   FiChevronRight,
-  FiChevronLeft
+  FiChevronLeft,
+  FiX
 } from 'react-icons/fi';
 
 interface SidebarProps {
   isOpen: boolean;
+  toggleSidebar: () => void;
+  isMobile: boolean;
 }
 
-const Sidebar = ({ isOpen }: SidebarProps) => {
+const Sidebar = ({ isOpen, toggleSidebar, isMobile }: SidebarProps) => {
   const navItems = [
     { path: '/dashboard', name: 'Dashboard', icon: FiHome },
     { path: '/clients', name: 'Clients', icon: FiUsers },
@@ -27,17 +30,38 @@ const Sidebar = ({ isOpen }: SidebarProps) => {
   ];
 
   return (
-    <aside 
-      className={`bg-white dark:bg-gray-800 shadow-md transition-all duration-300 ${
-        isOpen ? 'w-64' : 'w-20'
-      } h-screen fixed z-10 md:relative`}
-    >
-      {/* Logo */}
-      <div className="flex items-center justify-center h-16 border-b border-gray-200 dark:border-gray-700">
-        <h1 className={`text-xl font-bold text-blue-600 dark:text-blue-400 ${!isOpen && 'hidden'}`}>
-          Mini-CRM
-        </h1>
-        {!isOpen && <span className="text-blue-600 dark:text-blue-400 text-2xl font-bold">M</span>}
+    <>
+      {/* Mobile overlay */}
+      {isMobile && isOpen && (
+        <div 
+          className="fixed inset-0 bg-black bg-opacity-50 z-20" 
+          onClick={toggleSidebar}
+          aria-hidden="true"
+        />
+      )}
+      
+      <aside 
+        className={`bg-white dark:bg-gray-800 shadow-md transition-all duration-300 ease-in-out 
+          ${isOpen ? (isMobile ? 'w-64 translate-x-0' : 'w-64') : (isMobile ? '-translate-x-full' : 'w-20')}
+          h-screen overflow-y-auto ${isMobile ? 'fixed z-50 top-0 left-0' : 'sticky top-0'}`}
+      >
+      {/* Logo and close button for mobile */}
+      <div className="flex items-center justify-between h-16 border-b border-gray-200 dark:border-gray-700 px-4">
+        <div className="flex items-center">
+          <h1 className={`text-xl font-bold text-blue-600 dark:text-blue-400 ${!isOpen && !isMobile && 'hidden'}`}>
+            Mini-CRM
+          </h1>
+          {!isOpen && !isMobile && <span className="text-blue-600 dark:text-blue-400 text-2xl font-bold">M</span>}
+        </div>
+        {isMobile && (
+          <button 
+            onClick={toggleSidebar}
+            className="p-2 rounded-md text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-700 dark:text-gray-400"
+            aria-label="Close sidebar"
+          >
+            <FiX className="h-5 w-5" />
+          </button>
+        )}
       </div>
 
       {/* Navigation */}
@@ -63,16 +87,20 @@ const Sidebar = ({ isOpen }: SidebarProps) => {
         </ul>
       </nav>
 
-      {/* Collapse button at bottom */}
-      <div className="absolute bottom-4 w-full flex justify-center">
-        <button 
-          className="p-2 rounded-full bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300"
-          aria-label={isOpen ? 'Collapse sidebar' : 'Expand sidebar'}
-        >
-          {isOpen ? <FiChevronLeft /> : <FiChevronRight />}
-        </button>
-      </div>
+      {/* Collapse button at bottom - only show on desktop */}
+      {!isMobile && (
+        <div className="absolute bottom-4 w-full flex justify-center">
+          <button 
+            onClick={toggleSidebar}
+            className="p-2 rounded-full bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors"
+            aria-label={isOpen ? 'Collapse sidebar' : 'Expand sidebar'}
+          >
+            {isOpen ? <FiChevronLeft className="h-5 w-5" /> : <FiChevronRight className="h-5 w-5" />}
+          </button>
+        </div>
+      )}
     </aside>
+    </>
   );
 };
 

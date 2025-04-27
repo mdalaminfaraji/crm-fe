@@ -139,7 +139,11 @@ const Projects = () => {
   // Debounce search term to avoid too many API calls
   const debouncedSearchTerm = useDebounce(state.searchTerm, 500);
 
-  // Fetch projects data with search, filter, and pagination
+  // Fetch projects with search and pagination
+  // Memoize pagination values to avoid reference issues
+  const paginationPage = state.pagination.page;
+  const paginationLimit = state.pagination.limit;
+  
   const fetchProjects = useCallback(async () => {
     try {
       dispatch({ type: "FETCH_PROJECTS_START" });
@@ -174,12 +178,13 @@ const Projects = () => {
         timer: 2000,
       });
     }
-  }, [dispatch, state.pagination.page, state.pagination.limit, debouncedSearchTerm, state.statusFilter]);
+  }, [dispatch, paginationPage, paginationLimit, debouncedSearchTerm, state.statusFilter]);
 
-  // Load projects when search term, status filter or pagination changes
+  // Load projects when component mounts and when dependencies change
   useEffect(() => {
     fetchProjects();
-  }, [fetchProjects]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [debouncedSearchTerm, state.statusFilter, paginationPage, paginationLimit]);
 
   // Format date for display
   const formatDate = (dateString: string) => {
