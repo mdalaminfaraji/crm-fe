@@ -1,5 +1,8 @@
-import { useState, useEffect, ReactNode } from 'react';
-import { AuthContext, User, RegisterData } from './AuthContext';
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { useState, useEffect, ReactNode } from "react";
+import { AuthContext, User, RegisterData } from "./AuthContext";
+import authService from "../services/authService";
+import Swal from "sweetalert2";
 
 // Auth provider props
 interface AuthProviderProps {
@@ -17,42 +20,43 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     const checkAuth = async () => {
       try {
         setIsLoading(true);
-        
-        // Check if user is already authenticated in localStorage
-        const isAuth = localStorage.getItem('isAuthenticated') === 'true';
-        
-        if (isAuth) {
-          // In a real app, you would validate the token with the backend
-          // const response = await fetch('http://localhost:5000/api/auth/profile', {
-          //   headers: {
-          //     Authorization: `Bearer ${localStorage.getItem('token')}`
-          //   },
-          //   credentials: 'include'
-          // });
-          
-          // if (response.ok) {
-          //   const userData = await response.json();
-          //   setUser(userData.user);
-          // } else {
-          //   // If token is invalid, clear auth data
-          //   localStorage.removeItem('token');
-          //   localStorage.removeItem('isAuthenticated');
-          //   setUser(null);
-          // }
 
-          // For demo purposes, set a mock user
-          setUser({
-            id: '1',
-            email: 'demo@example.com',
-            firstName: 'Demo',
-            lastName: 'User'
-          });
+        // Check if token exists in localStorage
+        const token = localStorage.getItem("token");
+
+        if (token) {
+          try {
+            // Validate the token by fetching the user profile
+            const response = await authService.getProfile();
+
+            // Set user data from the response
+            setUser({
+              id: response.user.id,
+              email: response.user.email,
+              firstName: response.user.firstName || "",
+              lastName: response.user.lastName || "",
+            });
+
+            // Ensure isAuthenticated is set to true
+            localStorage.setItem("isAuthenticated", "true");
+          } catch (profileError) {
+            // If token is invalid or expired, clear auth data
+            console.error("Invalid token:", profileError);
+            localStorage.removeItem("token");
+            localStorage.removeItem("isAuthenticated");
+            setUser(null);
+          }
+        } else {
+          // No token found, ensure user is logged out
+          setUser(null);
+          localStorage.removeItem("isAuthenticated");
         }
-      } catch (err) {
-        console.error('Auth check error:', err);
+      } catch (error: unknown) {
+        // Handle unexpected errors
+        console.error("Auth check error:", error);
         setUser(null);
-        localStorage.removeItem('token');
-        localStorage.removeItem('isAuthenticated');
+        localStorage.removeItem("token");
+        localStorage.removeItem("isAuthenticated");
       } finally {
         setIsLoading(false);
       }
@@ -66,46 +70,40 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     try {
       setIsLoading(true);
       setError(null);
-      
-      // In a real app, you would call your API
-      // const response = await fetch('http://localhost:5000/api/auth/login', {
-      //   method: 'POST',
-      //   headers: {
-      //     'Content-Type': 'application/json'
-      //   },
-      //   body: JSON.stringify({ email, password }),
-      //   credentials: 'include'
-      // });
-      
-      // if (!response.ok) {
-      //   const errorData = await response.json();
-      //   throw new Error(errorData.message || 'Login failed');
-      // }
-      
-      // const data = await response.json();
-      // localStorage.setItem('token', data.token);
-      
-      // For demo purposes, simulate successful login
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      if (email !== 'demo@example.com' || password !== 'password') {
-        throw new Error('Invalid credentials');
-      }
-      
-      // Set mock user data
-      const userData = {
-        id: '1',
-        email: 'demo@example.com',
-        firstName: 'Demo',
-        lastName: 'User'
-      };
-      
-      setUser(userData);
-      localStorage.setItem('isAuthenticated', 'true');
-      localStorage.setItem('token', 'mock-jwt-token');
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'An error occurred during login');
-      console.error('Login error:', err);
+
+      // Call the backend API through authService
+      const response = await authService.login({ email, password });
+
+      // Store the JWT token in localStorage
+      localStorage.setItem("token", response.token);
+      localStorage.setItem("isAuthenticated", "true");
+
+      // Set the user data
+      setUser({
+        id: response.user.id,
+        email: response.user.email,
+        firstName: response.user.firstName || "",
+        lastName: response.user.lastName || "",
+      });
+    } catch (error: unknown) {
+      // Type-safe error handling
+      const errorMessage =
+        error instanceof Error
+          ? error.message
+          : typeof error === "object" && error !== null && "response" in error
+          ? (error as { response?: { data?: { message?: string } } }).response
+              ?.data?.message || "Login failed"
+          : "An error occurred during login";
+
+      setError(errorMessage);
+      Swal.fire({
+        icon: "error",
+        title: "Login Failed",
+        text: errorMessage,
+        showConfirmButton: false,
+        timer: 2000,
+      });
+      console.error("Login error:", error);
     } finally {
       setIsLoading(false);
     }
@@ -116,30 +114,30 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     try {
       setIsLoading(true);
       setError(null);
-      
-      // In a real app, you would call your API
-      // const response = await fetch('http://localhost:5000/api/auth/register', {
-      //   method: 'POST',
-      //   headers: {
-      //     'Content-Type': 'application/json'
-      //   },
-      //   body: JSON.stringify(userData)
-      // });
-      
-      // if (!response.ok) {
-      //   const errorData = await response.json();
-      //   throw new Error(errorData.message || 'Registration failed');
-      // }
-      
-      // For demo purposes, simulate successful registration
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      // In a real app, you would typically redirect to login after registration
-      // Here we'll just simulate a successful registration
-      console.log('Registration successful:', userData);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'An error occurred during registration');
-      console.error('Registration error:', err);
+
+      // Call the backend API through authService
+      const response = await authService.register({
+        firstName: userData.firstName,
+        lastName: userData.lastName,
+        email: userData.email,
+        password: userData.password,
+      });
+
+      // Return the response data for potential use in the component
+      return response;
+    } catch (error: unknown) {
+      // Type-safe error handling
+      const errorMessage =
+        error instanceof Error
+          ? error.message
+          : typeof error === "object" && error !== null && "response" in error
+          ? (error as any).response?.data?.message || "Registration failed"
+          : "An error occurred during registration";
+
+      setError(errorMessage);
+
+      console.error("Registration error:", error);
+      throw error; // Re-throw to allow handling in the component
     } finally {
       setIsLoading(false);
     }
@@ -149,22 +147,45 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   const logout = async () => {
     try {
       setIsLoading(true);
-      
-      // In a real app, you would call your API
-      // await fetch('http://localhost:5000/api/auth/logout', {
-      //   method: 'POST',
-      //   credentials: 'include'
-      // });
-      
-      // For demo purposes, simulate logout delay
-      await new Promise(resolve => setTimeout(resolve, 500));
-      
+
+      // Call the backend API through authService
+      await authService.logout();
+
       // Clear auth data
-      localStorage.removeItem('token');
-      localStorage.removeItem('isAuthenticated');
+      localStorage.removeItem("token");
+      localStorage.removeItem("isAuthenticated");
       setUser(null);
-    } catch (err) {
-      console.error('Logout error:', err);
+
+      // Show success notification
+      Swal.fire({
+        icon: "success",
+        title: "Logout Successful",
+        text: "You have been successfully logged out.",
+        showConfirmButton: false,
+        timer: 2000,
+      });
+    } catch (error: unknown) {
+      // Type-safe error handling
+      const errorMessage =
+        error instanceof Error
+          ? error.message
+          : "An error occurred during logout";
+
+      console.error("Logout error:", errorMessage);
+
+      // Even if there's an error, we still want to clear the local auth data
+      localStorage.removeItem("token");
+      localStorage.removeItem("isAuthenticated");
+      setUser(null);
+
+      // Show info notification instead of error since the user is logged out anyway
+      Swal.fire({
+        icon: "info",
+        title: "Logged Out",
+        text: "You have been logged out.",
+        showConfirmButton: false,
+        timer: 2000,
+      });
     } finally {
       setIsLoading(false);
     }
@@ -183,7 +204,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         login,
         register,
         logout,
-        error
+        error,
       }}
     >
       {children}

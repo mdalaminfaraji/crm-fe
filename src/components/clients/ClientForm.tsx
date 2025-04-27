@@ -1,7 +1,4 @@
-
-import { useForm } from 'react-hook-form';
-import { FiUser, FiMail, FiPhone, FiHome, FiTag } from 'react-icons/fi';
-
+import { useForm } from "react-hook-form";
 interface ClientFormProps {
   onSubmit: (data: ClientFormData) => void;
   onCancel: () => void;
@@ -14,19 +11,23 @@ export interface ClientFormData {
   email: string;
   phone: string;
   company: string;
-  status: 'Active' | 'Inactive';
+  status?: string;
   address?: string;
   notes?: string;
 }
 
-const ClientForm = ({ 
-  onSubmit, 
-  onCancel, 
-  initialData = {}, 
-  isSubmitting = false 
+const ClientForm = ({
+  onSubmit,
+  onCancel,
+  initialData = {},
+  isSubmitting = false,
 }: ClientFormProps) => {
-  const { register, handleSubmit, formState: { errors } } = useForm<ClientFormData>({
-    defaultValues: initialData
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<ClientFormData>({
+    defaultValues: initialData,
   });
 
   const handleFormSubmit = (data: ClientFormData) => {
@@ -39,23 +40,20 @@ const ClientForm = ({
         {/* Name */}
         <div>
           <label htmlFor="name" className="label">
-            Client Name *
+            Client Name <span className="text-red-500">*</span>
           </label>
-          <div className="relative">
-            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <FiUser className="text-gray-400" />
-            </div>
+          <div>
             <input
               id="name"
               type="text"
               className="input pl-10"
               placeholder="Enter client name"
-              {...register('name', { 
-                required: 'Client name is required',
+              {...register("name", {
+                required: "Client name is required",
                 minLength: {
                   value: 2,
-                  message: 'Name must be at least 2 characters'
-                }
+                  message: "Name must be at least 2 characters",
+                },
               })}
             />
           </div>
@@ -65,23 +63,20 @@ const ClientForm = ({
         {/* Email */}
         <div>
           <label htmlFor="email" className="label">
-            Email Address *
+            Email Address <span className="text-red-500">*</span>
           </label>
-          <div className="relative">
-            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <FiMail className="text-gray-400" />
-            </div>
+          <div>
             <input
               id="email"
               type="email"
               className="input pl-10"
               placeholder="client@example.com"
-              {...register('email', { 
-                required: 'Email is required',
+              {...register("email", {
+                required: "Email is required",
                 pattern: {
                   value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
-                  message: 'Invalid email address'
-                }
+                  message: "Invalid email address",
+                },
               })}
             />
           </div>
@@ -91,23 +86,20 @@ const ClientForm = ({
         {/* Phone */}
         <div>
           <label htmlFor="phone" className="label">
-            Phone Number *
+            Phone Number <span className="text-red-500">*</span>
           </label>
-          <div className="relative">
-            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <FiPhone className="text-gray-400" />
-            </div>
+          <div>
             <input
               id="phone"
               type="text"
               className="input pl-10"
               placeholder="(123) 456-7890"
-              {...register('phone', { 
-                required: 'Phone number is required',
+              {...register("phone", {
+                required: "Phone number is required",
                 pattern: {
                   value: /^[0-9()\-\s+]+$/,
-                  message: 'Invalid phone number format'
-                }
+                  message: "Invalid phone number format",
+                },
               })}
             />
           </div>
@@ -117,19 +109,16 @@ const ClientForm = ({
         {/* Company */}
         <div>
           <label htmlFor="company" className="label">
-            Company Name *
+            Company Name <span className="text-red-500">*</span>
           </label>
-          <div className="relative">
-            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <FiHome className="text-gray-400" />
-            </div>
+          <div>
             <input
               id="company"
               type="text"
               className="input pl-10"
               placeholder="Enter company name"
-              {...register('company', { 
-                required: 'Company name is required'
+              {...register("company", {
+                required: "Company name is required",
               })}
             />
           </div>
@@ -139,16 +128,13 @@ const ClientForm = ({
         {/* Status */}
         <div>
           <label htmlFor="status" className="label">
-            Status *
+            Status <span className="text-red-500">*</span>
           </label>
-          <div className="relative">
-            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <FiTag className="text-gray-400" />
-            </div>
+          <div>
             <select
               id="status"
               className="input pl-10"
-              {...register('status', { required: 'Status is required' })}
+              {...register("status", { required: "Status is required" })}
             >
               <option value="Active">Active</option>
               <option value="Inactive">Inactive</option>
@@ -167,7 +153,7 @@ const ClientForm = ({
             type="text"
             className="input"
             placeholder="Enter client address (optional)"
-            {...register('address')}
+            {...register("address")}
           />
         </div>
 
@@ -181,7 +167,7 @@ const ClientForm = ({
             rows={4}
             className="input"
             placeholder="Enter any additional notes about this client (optional)"
-            {...register('notes')}
+            {...register("notes")}
           ></textarea>
         </div>
       </div>
@@ -200,7 +186,11 @@ const ClientForm = ({
           className="btn btn-primary"
           disabled={isSubmitting}
         >
-          {isSubmitting ? 'Saving...' : initialData.name ? 'Update Client' : 'Add Client'}
+          {isSubmitting
+            ? "Saving..."
+            : initialData.name
+            ? "Update Client"
+            : "Add Client"}
         </button>
       </div>
     </form>

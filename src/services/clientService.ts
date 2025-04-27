@@ -7,6 +7,7 @@ export interface Client {
   phone: string;
   company?: string;
   notes?: string;
+  status?: string;
   createdAt: string;
   updatedAt: string;
   userId: string;
@@ -18,6 +19,7 @@ export interface ClientRequest {
   phone: string;
   company?: string;
   notes?: string;
+  status?: string;
 }
 
 export interface ClientResponse {
@@ -45,7 +47,10 @@ const clientService = {
     return response.data;
   },
 
-  update: async (id: string, clientData: Partial<ClientRequest>): Promise<ClientResponse> => {
+  update: async (
+    id: string,
+    clientData: Partial<ClientRequest>
+  ): Promise<ClientResponse> => {
     const response = await apiClient.put(`/api/clients/${id}`, clientData);
     return response.data;
   },

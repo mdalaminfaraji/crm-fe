@@ -1,4 +1,5 @@
 import { createContext } from 'react';
+import { AuthResponse } from '../services/authService';
 
 // Define the user type
 export interface User {
@@ -14,7 +15,7 @@ export interface AuthContextType {
   isAuthenticated: boolean;
   isLoading: boolean;
   login: (email: string, password: string) => Promise<void>;
-  register: (userData: RegisterData) => Promise<void>;
+  register: (userData: RegisterData) => Promise<AuthResponse>;
   logout: () => Promise<void>;
   error: string | null;
 }
@@ -31,9 +32,9 @@ export interface RegisterData {
 export const AuthContext = createContext<AuthContextType>({
   user: null,
   isAuthenticated: false,
-  isLoading: true,
-  login: async () => {},
-  register: async () => {},
-  logout: async () => {},
+  isLoading: false,
+  login: () => Promise.resolve(),
+  register: () => Promise.resolve({} as AuthResponse),
+  logout: () => Promise.resolve(),
   error: null
 });

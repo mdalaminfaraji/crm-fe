@@ -14,13 +14,15 @@
     "@tailwindcss/vite": "^4.1.4",
     "axios": "^1.8.4",
     "formik": "^2.4.6",
+    "immer": "^10.1.1",
     "react": "^19.0.0",
     "react-datepicker": "^8.3.0",
     "react-dom": "^19.0.0",
     "react-hook-form": "^7.56.1",
     "react-icons": "^5.5.0",
     "react-router-dom": "^7.5.1",
-    "react-toastify": "^11.0.5",
+    "sweetalert2": "^11.19.1",
+    "use-immer": "^0.11.0",
     "zod": "^3.24.3"
   },
   "devDependencies": {
