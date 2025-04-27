@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../../hooks/useAuth";
 import { useForm } from "react-hook-form";
-import { FiUser, FiMail, FiLock, FiEye, FiEyeOff } from "react-icons/fi";
+import { FiEye, FiEyeOff } from "react-icons/fi";
 import Swal from "sweetalert2";
 
 interface RegisterFormData {
@@ -83,7 +83,7 @@ const Register = () => {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900 px-4">
-      <div className="max-w-md w-full space-y-8 card">
+      <div className="max-w-lg w-full space-y-8 card">
         <div className="text-center">
           <h1 className="text-3xl font-extrabold text-gray-900 dark:text-white">
             Create an account
@@ -105,16 +105,13 @@ const Register = () => {
               <label htmlFor="firstName" className="label">
                 First Name
               </label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <FiUser className="text-gray-400" />
-                </div>
+              <div>
                 <input
                   id="firstName"
                   type="text"
                   autoComplete="given-name"
                   className="input pl-10"
-                  placeholder="John"
+                  placeholder="Enter your first name"
                   {...register("firstName", {
                     required: "First name is required",
                     minLength: {
@@ -125,7 +122,9 @@ const Register = () => {
                 />
               </div>
               {errors.firstName && (
-                <p className="error">{errors.firstName.message}</p>
+                <p className="text-red-500 dark:text-red-400">
+                  {errors.firstName.message}
+                </p>
               )}
             </div>
 
@@ -133,16 +132,13 @@ const Register = () => {
               <label htmlFor="lastName" className="label">
                 Last Name
               </label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <FiUser className="text-gray-400" />
-                </div>
+              <div>
                 <input
                   id="lastName"
                   type="text"
                   autoComplete="family-name"
                   className="input pl-10"
-                  placeholder="Doe"
+                  placeholder="Enter your last name"
                   {...register("lastName", {
                     required: "Last name is required",
                     minLength: {
@@ -153,7 +149,9 @@ const Register = () => {
                 />
               </div>
               {errors.lastName && (
-                <p className="error">{errors.lastName.message}</p>
+                <p className="text-red-500 dark:text-red-400">
+                  {errors.lastName.message}
+                </p>
               )}
             </div>
 
@@ -161,16 +159,13 @@ const Register = () => {
               <label htmlFor="email" className="label">
                 Email address
               </label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <FiMail className="text-gray-400" />
-                </div>
+              <div>
                 <input
                   id="email"
                   type="email"
                   autoComplete="email"
                   className="input pl-10"
-                  placeholder="you@example.com"
+                  placeholder="Enter your email address"
                   {...register("email", {
                     required: "Email is required",
                     pattern: {
@@ -180,22 +175,23 @@ const Register = () => {
                   })}
                 />
               </div>
-              {errors.email && <p className="error">{errors.email.message}</p>}
+              {errors.email && (
+                <p className="text-red-500 dark:text-red-400">
+                  {errors.email.message}
+                </p>
+              )}
             </div>
 
-            <div>
+            <div className="relative">
               <label htmlFor="password" className="label">
                 Password
               </label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <FiLock className="text-gray-400" />
-                </div>
+              <div>
                 <input
                   id="password"
                   type={showPassword ? "text" : "password"}
-                  className="input pl-10 pr-10"
-                  placeholder="••••••••"
+                  className="input "
+                  placeholder="Enter your password"
                   {...register("password", {
                     required: "Password is required",
                     minLength: {
@@ -212,7 +208,7 @@ const Register = () => {
                 />
                 <button
                   type="button"
-                  className="absolute inset-y-0 right-0 pr-3 flex items-center"
+                  className="absolute inset-y-0 right-0 pr-3 pt-4 flex items-center"
                   onClick={() => setShowPassword(!showPassword)}
                 >
                   {showPassword ? (
@@ -223,23 +219,22 @@ const Register = () => {
                 </button>
               </div>
               {errors.password && (
-                <p className="error">{errors.password.message}</p>
+                <p className="text-red-500 dark:text-red-400">
+                  {errors.password.message}
+                </p>
               )}
             </div>
 
-            <div>
+            <div className="relative">
               <label htmlFor="confirmPassword" className="label">
                 Confirm Password
               </label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <FiLock className="text-gray-400" />
-                </div>
+              <div>
                 <input
                   id="confirmPassword"
                   type={showPassword ? "text" : "password"}
                   className="input pl-10"
-                  placeholder="••••••••"
+                  placeholder="Enter your confirm password"
                   {...register("confirmPassword", {
                     required: "Please confirm your password",
                     validate: (value) =>
@@ -248,7 +243,9 @@ const Register = () => {
                 />
               </div>
               {errors.confirmPassword && (
-                <p className="error">{errors.confirmPassword.message}</p>
+                <p className="text-red-500 dark:text-red-400">
+                  {errors.confirmPassword.message}
+                </p>
               )}
             </div>
           </div>

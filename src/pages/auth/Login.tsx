@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "../../hooks/useAuth";
 import { useForm } from "react-hook-form";
-import { FiMail, FiLock, FiEye, FiEyeOff } from "react-icons/fi";
+import { FiEye, FiEyeOff } from "react-icons/fi";
 import Swal from "sweetalert2";
 
 interface LoginFormData {
@@ -81,12 +81,6 @@ const Login = () => {
           </div>
         )}
 
-        {location.state?.message && (
-          <div className="bg-green-50 dark:bg-green-900/30 text-green-800 dark:text-green-200 p-3 rounded-md text-sm">
-            {location.state.message}
-          </div>
-        )}
-
         <form className="mt-8 space-y-6" onSubmit={handleSubmit(onSubmit)}>
           <div className="space-y-4">
             <div>
@@ -94,15 +88,12 @@ const Login = () => {
                 Email address
               </label>
               <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <FiMail className="text-gray-400" />
-                </div>
                 <input
                   id="email"
                   type="email"
                   autoComplete="email"
                   className="input pl-10"
-                  placeholder="you@example.com"
+                  placeholder="Enter your email address"
                   {...register("email", {
                     required: "Email is required",
                     pattern: {
@@ -112,7 +103,11 @@ const Login = () => {
                   })}
                 />
               </div>
-              {errors.email && <p className="error">{errors.email.message}</p>}
+              {errors.email && (
+                <p className="text-red-500 dark:text-red-400">
+                  {errors.email.message}
+                </p>
+              )}
             </div>
 
             <div>
@@ -120,15 +115,12 @@ const Login = () => {
                 Password
               </label>
               <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <FiLock className="text-gray-400" />
-                </div>
                 <input
                   id="password"
                   type={showPassword ? "text" : "password"}
                   autoComplete="current-password"
                   className="input pl-10 pr-10"
-                  placeholder="••••••••"
+                  placeholder="Enter your password"
                   {...register("password", {
                     required: "Password is required",
                     minLength: {
@@ -150,7 +142,9 @@ const Login = () => {
                 </button>
               </div>
               {errors.password && (
-                <p className="error">{errors.password.message}</p>
+                <p className="text-red-500 dark:text-red-400">
+                  {errors.password.message}
+                </p>
               )}
             </div>
           </div>
