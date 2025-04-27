@@ -1,10 +1,4 @@
-import {
-  Control,
-  Controller,
-  FieldError,
-  FieldValues,
-  Path,
-} from "react-hook-form";
+import { Control, Controller, FieldError, FieldValues, Path } from 'react-hook-form';
 
 interface TextareaFieldProps<T extends FieldValues> {
   name: Path<T>;
@@ -27,7 +21,7 @@ const TextareaField = <T extends FieldValues>({
   isRequired = false,
   rows = 3,
   disabled = false,
-  className = "",
+  className = '',
 }: TextareaFieldProps<T>) => {
   return (
     <div className={className}>
@@ -50,11 +44,11 @@ const TextareaField = <T extends FieldValues>({
                 disabled={disabled}
                 className={`mt-1 p-2 block w-full rounded-md shadow-sm text-white focus:border-blue-500 focus:ring-blue-500 dark:bg-[#374151] dark:text-white ${
                   error
-                    ? "border-red-500 focus:border-red-500 focus:ring-red-500"
-                    : "border-gray-300 dark:border-gray-600"
+                    ? 'border-red-500 focus:border-red-500 focus:ring-red-500'
+                    : 'border-gray-300 dark:border-gray-600'
                 }`}
                 ref={ref}
-                value={value || ""}
+                value={value || ''}
                 onChange={onChange}
                 {...rest}
               />

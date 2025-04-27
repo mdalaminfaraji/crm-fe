@@ -1,4 +1,4 @@
-import { Control, Controller, FieldError, FieldValues, Path } from "react-hook-form";
+import { Control, Controller, FieldError, FieldValues, Path } from 'react-hook-form';
 
 interface CheckboxFieldProps<T extends FieldValues> {
   name: Path<T>;
@@ -17,10 +17,12 @@ const CheckboxField = <T extends FieldValues>({
   error,
   disabled = false,
   helperText,
-  className = "",
+  className = '',
 }: CheckboxFieldProps<T>) => {
   return (
-    <div className={`flex items-center p-3 border border-gray-200 dark:border-gray-700 rounded-md hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors ${className}`}>
+    <div
+      className={`flex items-center p-3 border border-gray-200 dark:border-gray-700 rounded-md hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors ${className}`}
+    >
       <Controller
         name={name}
         control={control}
@@ -43,7 +45,9 @@ const CheckboxField = <T extends FieldValues>({
         {label}
       </label>
       {error && <p className="mt-1 text-sm text-red-500">{error.message}</p>}
-      {helperText && <p className="ml-auto text-xs text-gray-500 dark:text-gray-400">{helperText}</p>}
+      {helperText && (
+        <p className="ml-auto text-xs text-gray-500 dark:text-gray-400">{helperText}</p>
+      )}
     </div>
   );
 };

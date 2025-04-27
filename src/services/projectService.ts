@@ -1,11 +1,11 @@
-import apiClient from "./apiClient";
+import apiClient from './apiClient';
 
 export enum ProjectStatus {
-  NOT_STARTED = "NOT_STARTED",
-  IN_PROGRESS = "IN_PROGRESS",
-  ON_HOLD = "ON_HOLD",
-  COMPLETED = "COMPLETED",
-  CANCELLED = "CANCELLED"
+  NOT_STARTED = 'NOT_STARTED',
+  IN_PROGRESS = 'IN_PROGRESS',
+  ON_HOLD = 'ON_HOLD',
+  COMPLETED = 'COMPLETED',
+  CANCELLED = 'CANCELLED',
 }
 
 export interface Project {
@@ -63,7 +63,7 @@ export interface ProjectSearchParams {
 const projectService = {
   getAll: async (params?: ProjectSearchParams): Promise<ProjectsResponse> => {
     const queryParams = new URLSearchParams();
-    
+
     if (params) {
       if (params.page) queryParams.append('page', params.page.toString());
       if (params.limit) queryParams.append('limit', params.limit.toString());
@@ -73,7 +73,7 @@ const projectService = {
       if (params.sortBy) queryParams.append('sortBy', params.sortBy);
       if (params.sortOrder) queryParams.append('sortOrder', params.sortOrder);
     }
-    
+
     const url = `/api/projects${queryParams.toString() ? `?${queryParams.toString()}` : ''}`;
     const response = await apiClient.get(url);
     return response.data;
@@ -85,7 +85,7 @@ const projectService = {
   },
 
   create: async (projectData: ProjectRequest): Promise<ProjectResponse> => {
-    const response = await apiClient.post("/api/projects", projectData);
+    const response = await apiClient.post('/api/projects', projectData);
     return response.data;
   },
 

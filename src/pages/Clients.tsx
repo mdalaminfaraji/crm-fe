@@ -1,12 +1,16 @@
-import { useEffect, useCallback } from "react";
-import { FiPlus, FiEdit2, FiTrash2, FiSearch, FiX } from "react-icons/fi";
-import Modal from "../components/common/Modal";
-import ClientForm, { ClientFormData } from "../components/clients/ClientForm";
-import clientService, { Client as ClientType, PaginationData, ClientSearchParams } from "../services/clientService";
-import { useImmerReducer } from "use-immer";
-import Swal from "sweetalert2";
-import Pagination from "../components/common/Pagination";
-import useDebounce from "../hooks/useDebounce";
+import { useEffect, useCallback } from 'react';
+import { FiPlus, FiEdit2, FiTrash2, FiSearch, FiX } from 'react-icons/fi';
+import Modal from '../components/common/Modal';
+import ClientForm, { ClientFormData } from '../components/clients/ClientForm';
+import clientService, {
+  Client as ClientType,
+  PaginationData,
+  ClientSearchParams,
+} from '../services/clientService';
+import { useImmerReducer } from 'use-immer';
+import Swal from 'sweetalert2';
+import Pagination from '../components/common/Pagination';
+import useDebounce from '../hooks/useDebounce';
 
 // State interface
 interface ClientsState {
@@ -22,23 +26,26 @@ interface ClientsState {
 
 // Action types
 type ClientsAction =
-  | { type: "FETCH_CLIENTS_START" }
-  | { type: "FETCH_CLIENTS_SUCCESS"; payload: { clients: ClientType[], pagination: PaginationData } }
-  | { type: "FETCH_CLIENTS_ERROR"; payload: string }
-  | { type: "SET_SEARCH_TERM"; payload: string }
-  | { type: "TOGGLE_MODAL"; payload?: ClientType | null }
-  | { type: "SET_SUBMITTING"; payload: boolean }
-  | { type: "ADD_CLIENT"; payload: ClientType }
-  | { type: "UPDATE_CLIENT"; payload: ClientType }
-  | { type: "DELETE_CLIENT"; payload: string }
-  | { type: "SET_PAGINATION"; payload: PaginationData };
+  | { type: 'FETCH_CLIENTS_START' }
+  | {
+      type: 'FETCH_CLIENTS_SUCCESS';
+      payload: { clients: ClientType[]; pagination: PaginationData };
+    }
+  | { type: 'FETCH_CLIENTS_ERROR'; payload: string }
+  | { type: 'SET_SEARCH_TERM'; payload: string }
+  | { type: 'TOGGLE_MODAL'; payload?: ClientType | null }
+  | { type: 'SET_SUBMITTING'; payload: boolean }
+  | { type: 'ADD_CLIENT'; payload: ClientType }
+  | { type: 'UPDATE_CLIENT'; payload: ClientType }
+  | { type: 'DELETE_CLIENT'; payload: string }
+  | { type: 'SET_PAGINATION'; payload: PaginationData };
 
 // Initial state
 const initialState: ClientsState = {
   clients: [],
   isLoading: false,
   error: null,
-  searchTerm: "",
+  searchTerm: '',
   isModalOpen: false,
   isSubmitting: false,
   currentClient: null,
@@ -48,52 +55,50 @@ const initialState: ClientsState = {
     totalCount: 0,
     totalPages: 1,
     hasNextPage: false,
-    hasPreviousPage: false
-  }
+    hasPreviousPage: false,
+  },
 };
 
 // Reducer function
 const clientsReducer = (draft: ClientsState, action: ClientsAction) => {
   switch (action.type) {
-    case "FETCH_CLIENTS_START":
+    case 'FETCH_CLIENTS_START':
       draft.isLoading = true;
       draft.error = null;
       break;
-    case "FETCH_CLIENTS_SUCCESS":
+    case 'FETCH_CLIENTS_SUCCESS':
       draft.clients = action.payload.clients;
       draft.pagination = action.payload.pagination;
       draft.isLoading = false;
       break;
-    case "FETCH_CLIENTS_ERROR":
+    case 'FETCH_CLIENTS_ERROR':
       draft.error = action.payload;
       draft.isLoading = false;
       break;
-    case "SET_SEARCH_TERM":
+    case 'SET_SEARCH_TERM':
       draft.searchTerm = action.payload;
       // Reset to first page when searching
       if (draft.pagination.page !== 1) {
         draft.pagination.page = 1;
       }
       break;
-    case "SET_PAGINATION":
+    case 'SET_PAGINATION':
       draft.pagination = action.payload;
       break;
-    case "TOGGLE_MODAL":
+    case 'TOGGLE_MODAL':
       draft.isModalOpen = !draft.isModalOpen;
       draft.currentClient = action.payload || null;
       break;
-    case "SET_SUBMITTING":
+    case 'SET_SUBMITTING':
       draft.isSubmitting = action.payload;
       break;
-    case "ADD_CLIENT":
+    case 'ADD_CLIENT':
       draft.clients.unshift(action.payload);
       draft.isModalOpen = false;
       draft.isSubmitting = false;
       break;
-    case "UPDATE_CLIENT": {
-      const index = draft.clients.findIndex(
-        (client) => client.id === action.payload.id
-      );
+    case 'UPDATE_CLIENT': {
+      const index = draft.clients.findIndex((client) => client.id === action.payload.id);
       if (index !== -1) {
         draft.clients[index] = action.payload;
       }
@@ -101,10 +106,8 @@ const clientsReducer = (draft: ClientsState, action: ClientsAction) => {
       draft.isSubmitting = false;
       break;
     }
-    case "DELETE_CLIENT":
-      draft.clients = draft.clients.filter(
-        (client) => client.id !== action.payload
-      );
+    case 'DELETE_CLIENT':
+      draft.clients = draft.clients.filter((client) => client.id !== action.payload);
       break;
   }
 };
@@ -112,39 +115,38 @@ const clientsReducer = (draft: ClientsState, action: ClientsAction) => {
 const Clients = () => {
   // Use immer reducer for state management
   const [state, dispatch] = useImmerReducer(clientsReducer, initialState);
-  
+
   // Debounce search term to avoid too many API calls
   const debouncedSearchTerm = useDebounce(state.searchTerm, 500);
 
   // Fetch clients data with search and pagination
   const fetchClients = useCallback(async () => {
     try {
-      dispatch({ type: "FETCH_CLIENTS_START" });
-      
+      dispatch({ type: 'FETCH_CLIENTS_START' });
+
       const searchParams: ClientSearchParams = {
         page: state.pagination.page,
         limit: state.pagination.limit,
         search: debouncedSearchTerm,
-        sortBy: "createdAt",
-        sortOrder: "desc",
+        sortBy: 'createdAt',
+        sortOrder: 'desc',
       };
-      
+
       const response = await clientService.getAll(searchParams);
-      
-      dispatch({ 
-        type: "FETCH_CLIENTS_SUCCESS", 
+
+      dispatch({
+        type: 'FETCH_CLIENTS_SUCCESS',
         payload: {
           clients: response.clients,
-          pagination: response.pagination
-        }
+          pagination: response.pagination,
+        },
       });
     } catch (error) {
-      const errorMessage =
-        error instanceof Error ? error.message : "Failed to fetch clients";
-      dispatch({ type: "FETCH_CLIENTS_ERROR", payload: errorMessage });
+      const errorMessage = error instanceof Error ? error.message : 'Failed to fetch clients';
+      dispatch({ type: 'FETCH_CLIENTS_ERROR', payload: errorMessage });
       Swal.fire({
-        icon: "error",
-        title: "Failed to fetch clients",
+        icon: 'error',
+        title: 'Failed to fetch clients',
         text: errorMessage,
         showConfirmButton: false,
         timer: 2000,
@@ -162,8 +164,7 @@ const Clients = () => {
     (client) =>
       client.name.toLowerCase().includes(state.searchTerm.toLowerCase()) ||
       client.email.toLowerCase().includes(state.searchTerm.toLowerCase()) ||
-      (client.company &&
-        client.company.toLowerCase().includes(state.searchTerm.toLowerCase()))
+      (client.company && client.company.toLowerCase().includes(state.searchTerm.toLowerCase())),
   );
 
   // Format date
@@ -173,47 +174,44 @@ const Clients = () => {
 
   // Handle search input change
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    dispatch({ type: "SET_SEARCH_TERM", payload: e.target.value });
+    dispatch({ type: 'SET_SEARCH_TERM', payload: e.target.value });
   };
 
   // Clear search
   const handleClearSearch = () => {
-    dispatch({ type: "SET_SEARCH_TERM", payload: "" });
+    dispatch({ type: 'SET_SEARCH_TERM', payload: '' });
   };
 
   // Handle page change
   const handlePageChange = (page: number) => {
     const newPagination = { ...state.pagination, page };
-    dispatch({ type: "SET_PAGINATION", payload: newPagination });
+    dispatch({ type: 'SET_PAGINATION', payload: newPagination });
   };
 
   // Handle opening the modal for adding a new client
   const handleAddClient = () => {
-    dispatch({ type: "TOGGLE_MODAL" });
+    dispatch({ type: 'TOGGLE_MODAL' });
   };
 
   // Handle opening the modal for editing an existing client
   const handleEditClient = (client: ClientType) => {
-    dispatch({ type: "TOGGLE_MODAL", payload: client });
+    dispatch({ type: 'TOGGLE_MODAL', payload: client });
   };
 
   // Handle form submission
   const handleSubmitClient = async (data: ClientFormData) => {
-    dispatch({ type: "SET_SUBMITTING", payload: true });
+    dispatch({ type: 'SET_SUBMITTING', payload: true });
 
     try {
       if (state.currentClient) {
         // Update existing client
-        const response = await clientService.update(
-          state.currentClient.id,
-          data
-        );
+        const response = await clientService.update(state.currentClient.id, data);
 
-        dispatch({ type: "UPDATE_CLIENT", payload: response.client });
+        dispatch({ type: 'UPDATE_CLIENT', payload: response.client });
 
         Swal.fire({
-          icon: "success",
-          title: "Client updated successfully",
+          icon: 'success',
+          title: 'Client updated successfully',
           showConfirmButton: false,
           timer: 2000,
         });
@@ -221,66 +219,64 @@ const Clients = () => {
         // Create new client
         const response = await clientService.create(data);
 
-        dispatch({ type: "ADD_CLIENT", payload: response.client });
+        dispatch({ type: 'ADD_CLIENT', payload: response.client });
 
         Swal.fire({
-          icon: "success",
-          title: "Client created successfully",
+          icon: 'success',
+          title: 'Client created successfully',
           showConfirmButton: false,
           timer: 2000,
         });
       }
     } catch (error) {
-      const errorMessage =
-        error instanceof Error ? error.message : "Operation failed";
+      const errorMessage = error instanceof Error ? error.message : 'Operation failed';
       Swal.fire({
-        icon: "error",
-        title: "Operation failed",
+        icon: 'error',
+        title: 'Operation failed',
         text: errorMessage,
         showConfirmButton: false,
         timer: 2000,
       });
-      console.error("Error submitting client:", error);
-      dispatch({ type: "SET_SUBMITTING", payload: false });
+      console.error('Error submitting client:', error);
+      dispatch({ type: 'SET_SUBMITTING', payload: false });
     }
   };
 
   // Handle client deletion after confirmation
   const handleDeleteClient = async (id: string) => {
     Swal.fire({
-      icon: "warning",
-      title: "Are you sure?",
+      icon: 'warning',
+      title: 'Are you sure?',
       text: "You won't be able to revert this!",
       showCancelButton: true,
-      confirmButtonColor: "#3085d6",
-      cancelButtonColor: "#d33",
-      confirmButtonText: "Yes, delete it!",
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#d33',
+      confirmButtonText: 'Yes, delete it!',
     }).then(async (result) => {
       if (result.isConfirmed) {
         try {
           await clientService.delete(id);
 
-          dispatch({ type: "DELETE_CLIENT", payload: id });
+          dispatch({ type: 'DELETE_CLIENT', payload: id });
 
           Swal.fire({
-            icon: "success",
-            title: "Deleted!",
-            text: "Client deleted successfully.",
+            icon: 'success',
+            title: 'Deleted!',
+            text: 'Client deleted successfully.',
             showConfirmButton: false,
             timer: 2000,
           });
         } catch (error) {
-          const errorMessage =
-            error instanceof Error ? error.message : "Failed to delete client";
+          const errorMessage = error instanceof Error ? error.message : 'Failed to delete client';
           Swal.fire({
-            icon: "error",
-            title: "Failed to delete client",
+            icon: 'error',
+            title: 'Failed to delete client',
             text: errorMessage,
             showConfirmButton: false,
             timer: 2000,
           });
         } finally {
-          dispatch({ type: "TOGGLE_MODAL" });
+          dispatch({ type: 'TOGGLE_MODAL' });
         }
       }
     });
@@ -298,7 +294,7 @@ const Clients = () => {
           <FiPlus className="mr-2" /> Add Client
         </button>
       </div>
-      
+
       {/* Search and filter section */}
       <div className="mb-6">
         <div className="relative">
@@ -328,9 +324,7 @@ const Clients = () => {
         {state.isLoading ? (
           <div className="p-6 text-center">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto"></div>
-            <p className="mt-4 text-gray-600 dark:text-gray-400">
-              Loading clients...
-            </p>
+            <p className="mt-4 text-gray-600 dark:text-gray-400">Loading clients...</p>
           </div>
         ) : state.error ? (
           <div className="p-6 text-center">
@@ -345,13 +339,10 @@ const Clients = () => {
         ) : state.clients.length === 0 ? (
           <div className="p-6 text-center">
             <p className="text-gray-600 dark:text-gray-400">
-              {state.searchTerm 
-                ? `No clients found matching "${state.searchTerm}". Try a different search term or` 
-                : "No clients found."}
-              <button
-                onClick={handleAddClient}
-                className="text-blue-500 hover:underline ml-1"
-              >
+              {state.searchTerm
+                ? `No clients found matching "${state.searchTerm}". Try a different search term or`
+                : 'No clients found.'}
+              <button onClick={handleAddClient} className="text-blue-500 hover:underline ml-1">
                 add a new client
               </button>
               .
@@ -387,14 +378,9 @@ const Clients = () => {
               </thead>
               <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
                 {filteredClients.map((client) => (
-                  <tr
-                    key={client.id}
-                    className="hover:bg-gray-50 dark:hover:bg-gray-700"
-                  >
+                  <tr key={client.id} className="hover:bg-gray-50 dark:hover:bg-gray-700">
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="font-medium text-gray-900 dark:text-white">
-                        {client.name}
-                      </div>
+                      <div className="font-medium text-gray-900 dark:text-white">{client.name}</div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
                       {client.email}
@@ -408,12 +394,12 @@ const Clients = () => {
                     <td className="px-6 py-4 whitespace-nowrap">
                       <span
                         className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                          client?.status === "Active"
-                            ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200"
-                            : "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200"
+                          client?.status === 'Active'
+                            ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
+                            : 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'
                         }`}
                       >
-                        {client?.status || "Active"}
+                        {client?.status || 'Active'}
                       </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
@@ -454,12 +440,12 @@ const Clients = () => {
       {/* Client Form Modal */}
       <Modal
         isOpen={state.isModalOpen}
-        onClose={() => dispatch({ type: "TOGGLE_MODAL" })}
-        title={state.currentClient ? "Edit Client" : "Add New Client"}
+        onClose={() => dispatch({ type: 'TOGGLE_MODAL' })}
+        title={state.currentClient ? 'Edit Client' : 'Add New Client'}
       >
         <ClientForm
           onSubmit={handleSubmitClient}
-          onCancel={() => dispatch({ type: "TOGGLE_MODAL" })}
+          onCancel={() => dispatch({ type: 'TOGGLE_MODAL' })}
           initialData={state.currentClient || {}}
           isSubmitting={state.isSubmitting}
         />

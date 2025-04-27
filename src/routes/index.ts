@@ -1,6 +1,6 @@
-import AppRouter from "./AppRouter";
-import { ProtectedRoute, PublicRoute, RouteGuard, LoadingSpinner } from "./RouteGuard";
-import { privateRoutes, publicRoutes, routes, RouteType, RouteConfig } from "./routeConfig";
+import AppRouter from './AppRouter';
+import { ProtectedRoute, PublicRoute, RouteGuard, LoadingSpinner } from './RouteGuard';
+import { privateRoutes, publicRoutes, routes, RouteType, RouteConfig } from './routeConfig';
 
 export {
   AppRouter,
@@ -11,7 +11,7 @@ export {
   privateRoutes,
   publicRoutes,
   routes,
-  RouteType
+  RouteType,
 };
 
 export type { RouteConfig };

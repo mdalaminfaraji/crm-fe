@@ -36,5 +36,5 @@ export const AuthContext = createContext<AuthContextType>({
   login: () => Promise.resolve(),
   register: () => Promise.resolve({} as AuthResponse),
   logout: () => Promise.resolve(),
-  error: null
+  error: null,
 });

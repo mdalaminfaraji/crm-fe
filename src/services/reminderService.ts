@@ -1,4 +1,4 @@
-import apiClient from "./apiClient";
+import apiClient from './apiClient';
 
 // Pagination data interface
 export interface PaginationData {
@@ -61,19 +61,20 @@ export interface ReminderSearchParams {
 const reminderService = {
   getAll: async (params?: ReminderSearchParams): Promise<RemindersResponse> => {
     const queryParams = new URLSearchParams();
-    
+
     if (params) {
       if (params.page) queryParams.append('page', params.page.toString());
       if (params.limit) queryParams.append('limit', params.limit.toString());
       if (params.search) queryParams.append('search', params.search);
       if (params.dueThisWeek) queryParams.append('dueThisWeek', params.dueThisWeek.toString());
-      if (params.completed !== undefined) queryParams.append('completed', params.completed.toString());
+      if (params.completed !== undefined)
+        queryParams.append('completed', params.completed.toString());
       if (params.clientId) queryParams.append('clientId', params.clientId);
       if (params.projectId) queryParams.append('projectId', params.projectId);
       if (params.sortBy) queryParams.append('sortBy', params.sortBy);
       if (params.sortOrder) queryParams.append('sortOrder', params.sortOrder);
     }
-    
+
     const url = `/api/reminders${queryParams.toString() ? `?${queryParams.toString()}` : ''}`;
     const response = await apiClient.get(url);
     return response.data;
@@ -85,7 +86,7 @@ const reminderService = {
   },
 
   create: async (reminderData: ReminderRequest): Promise<ReminderResponse> => {
-    const response = await apiClient.post("/api/reminders", reminderData);
+    const response = await apiClient.post('/api/reminders', reminderData);
     return response.data;
   },
 

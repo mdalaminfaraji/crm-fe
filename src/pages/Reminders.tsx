@@ -1,4 +1,4 @@
-import { useEffect, useCallback } from "react";
+import { useEffect, useCallback } from 'react';
 import {
   FiPlus,
   FiEdit2,
@@ -11,40 +11,38 @@ import {
   FiClock,
   FiUsers,
   FiFolder,
-} from "react-icons/fi";
-import Modal from "../components/common/Modal";
-import ReminderForm, {
-  ReminderFormData,
-} from "../components/reminders/ReminderForm";
+} from 'react-icons/fi';
+import Modal from '../components/common/Modal';
+import ReminderForm, { ReminderFormData } from '../components/reminders/ReminderForm';
 import reminderService, {
   Reminder as ReminderType,
   ReminderSearchParams,
   PaginationData,
-} from "../services/reminderService";
-import Pagination from "../components/common/Pagination";
-import useDebounce from "../hooks/useDebounce";
-import { useImmerReducer } from "use-immer";
-import { formatDate } from "../utils/formatters";
-import Swal from "sweetalert2";
+} from '../services/reminderService';
+import Pagination from '../components/common/Pagination';
+import useDebounce from '../hooks/useDebounce';
+import { useImmerReducer } from 'use-immer';
+import { formatDate } from '../utils/formatters';
+import Swal from 'sweetalert2';
 
 // Action types
 type RemindersAction =
-  | { type: "FETCH_REMINDERS_START" }
+  | { type: 'FETCH_REMINDERS_START' }
   | {
-      type: "FETCH_REMINDERS_SUCCESS";
+      type: 'FETCH_REMINDERS_SUCCESS';
       payload: { reminders: ReminderType[]; pagination: PaginationData };
     }
-  | { type: "FETCH_REMINDERS_ERROR"; payload: string }
-  | { type: "SET_SEARCH_TERM"; payload: string }
-  | { type: "SET_COMPLETED_FILTER"; payload: string }
-  | { type: "SET_DUE_THIS_WEEK_FILTER"; payload: boolean }
-  | { type: "SET_PAGINATION"; payload: PaginationData }
-  | { type: "TOGGLE_MODAL"; payload?: ReminderType }
-  | { type: "SET_SUBMITTING"; payload: boolean }
-  | { type: "ADD_REMINDER"; payload: ReminderType }
-  | { type: "UPDATE_REMINDER"; payload: ReminderType }
-  | { type: "DELETE_REMINDER"; payload: string }
-  | { type: "TOGGLE_REMINDER_COMPLETED"; payload: { id: string; completed: boolean } };
+  | { type: 'FETCH_REMINDERS_ERROR'; payload: string }
+  | { type: 'SET_SEARCH_TERM'; payload: string }
+  | { type: 'SET_COMPLETED_FILTER'; payload: string }
+  | { type: 'SET_DUE_THIS_WEEK_FILTER'; payload: boolean }
+  | { type: 'SET_PAGINATION'; payload: PaginationData }
+  | { type: 'TOGGLE_MODAL'; payload?: ReminderType }
+  | { type: 'SET_SUBMITTING'; payload: boolean }
+  | { type: 'ADD_REMINDER'; payload: ReminderType }
+  | { type: 'UPDATE_REMINDER'; payload: ReminderType }
+  | { type: 'DELETE_REMINDER'; payload: string }
+  | { type: 'TOGGLE_REMINDER_COMPLETED'; payload: { id: string; completed: boolean } };
 
 // State interface
 interface RemindersState {
@@ -65,8 +63,8 @@ const initialState: RemindersState = {
   reminders: [],
   isLoading: false,
   error: null,
-  searchTerm: "",
-  completedFilter: "",
+  searchTerm: '',
+  completedFilter: '',
   dueThisWeekFilter: false,
   pagination: {
     page: 1,
@@ -82,61 +80,56 @@ const initialState: RemindersState = {
 };
 
 // Reducer function
-const remindersReducer = (
-  draft: RemindersState,
-  action: RemindersAction
-) => {
+const remindersReducer = (draft: RemindersState, action: RemindersAction) => {
   switch (action.type) {
-    case "FETCH_REMINDERS_START":
+    case 'FETCH_REMINDERS_START':
       draft.isLoading = true;
       draft.error = null;
       break;
-    case "FETCH_REMINDERS_SUCCESS":
+    case 'FETCH_REMINDERS_SUCCESS':
       draft.isLoading = false;
       draft.reminders = action.payload.reminders;
       draft.pagination = action.payload.pagination;
       break;
-    case "FETCH_REMINDERS_ERROR":
+    case 'FETCH_REMINDERS_ERROR':
       draft.isLoading = false;
       draft.error = action.payload;
       break;
-    case "SET_SEARCH_TERM":
+    case 'SET_SEARCH_TERM':
       draft.searchTerm = action.payload;
       if (draft.pagination.page !== 1) {
         draft.pagination.page = 1;
       }
       break;
-    case "SET_COMPLETED_FILTER":
+    case 'SET_COMPLETED_FILTER':
       draft.completedFilter = action.payload;
       if (draft.pagination.page !== 1) {
         draft.pagination.page = 1;
       }
       break;
-    case "SET_DUE_THIS_WEEK_FILTER":
+    case 'SET_DUE_THIS_WEEK_FILTER':
       draft.dueThisWeekFilter = action.payload;
       if (draft.pagination.page !== 1) {
         draft.pagination.page = 1;
       }
       break;
-    case "SET_PAGINATION":
+    case 'SET_PAGINATION':
       draft.pagination = action.payload;
       break;
-    case "TOGGLE_MODAL":
+    case 'TOGGLE_MODAL':
       draft.isModalOpen = !draft.isModalOpen;
       draft.currentReminder = action.payload || null;
       break;
-    case "SET_SUBMITTING":
+    case 'SET_SUBMITTING':
       draft.isSubmitting = action.payload;
       break;
-    case "ADD_REMINDER":
+    case 'ADD_REMINDER':
       draft.reminders.unshift(action.payload);
       draft.isModalOpen = false;
       draft.isSubmitting = false;
       break;
-    case "UPDATE_REMINDER": {
-      const index = draft.reminders.findIndex(
-        (r) => r.id === action.payload.id
-      );
+    case 'UPDATE_REMINDER': {
+      const index = draft.reminders.findIndex((r) => r.id === action.payload.id);
       if (index !== -1) {
         draft.reminders[index] = action.payload;
       }
@@ -144,15 +137,11 @@ const remindersReducer = (
       draft.isSubmitting = false;
       break;
     }
-    case "DELETE_REMINDER":
-      draft.reminders = draft.reminders.filter(
-        (r) => r.id !== action.payload
-      );
+    case 'DELETE_REMINDER':
+      draft.reminders = draft.reminders.filter((r) => r.id !== action.payload);
       break;
-    case "TOGGLE_REMINDER_COMPLETED": {
-      const index = draft.reminders.findIndex(
-        (r) => r.id === action.payload.id
-      );
+    case 'TOGGLE_REMINDER_COMPLETED': {
+      const index = draft.reminders.findIndex((r) => r.id === action.payload.id);
       if (index !== -1) {
         draft.reminders[index].completed = action.payload.completed;
       }
@@ -173,38 +162,38 @@ const Reminders = () => {
   // Fetch reminders data with search, filter, and pagination
   const fetchReminders = useCallback(async () => {
     try {
-      dispatch({ type: "FETCH_REMINDERS_START" });
+      dispatch({ type: 'FETCH_REMINDERS_START' });
 
       const searchParams: ReminderSearchParams = {
         page: state.pagination.page,
         limit: state.pagination.limit,
         search: debouncedSearchTerm,
         dueThisWeek: state.dueThisWeekFilter || undefined,
-        completed: state.completedFilter === "completed" 
-          ? true 
-          : state.completedFilter === "pending" 
-            ? false 
-            : undefined,
-        sortBy: "dueDate",
-        sortOrder: "asc",
+        completed:
+          state.completedFilter === 'completed'
+            ? true
+            : state.completedFilter === 'pending'
+              ? false
+              : undefined,
+        sortBy: 'dueDate',
+        sortOrder: 'asc',
       };
 
       const response = await reminderService.getAll(searchParams);
 
       dispatch({
-        type: "FETCH_REMINDERS_SUCCESS",
+        type: 'FETCH_REMINDERS_SUCCESS',
         payload: {
           reminders: response.reminders,
           pagination: response.pagination || state.pagination,
         },
       });
     } catch (error) {
-      const errorMessage =
-        error instanceof Error ? error.message : "Failed to fetch reminders";
-      dispatch({ type: "FETCH_REMINDERS_ERROR", payload: errorMessage });
+      const errorMessage = error instanceof Error ? error.message : 'Failed to fetch reminders';
+      dispatch({ type: 'FETCH_REMINDERS_ERROR', payload: errorMessage });
       Swal.fire({
-        icon: "error",
-        title: "Failed to fetch reminders",
+        icon: 'error',
+        title: 'Failed to fetch reminders',
         text: errorMessage,
         showConfirmButton: false,
         timer: 2000,
@@ -226,25 +215,23 @@ const Reminders = () => {
 
   // Handle search input change
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    dispatch({ type: "SET_SEARCH_TERM", payload: e.target.value });
+    dispatch({ type: 'SET_SEARCH_TERM', payload: e.target.value });
   };
 
   // Clear search
   const handleClearSearch = () => {
-    dispatch({ type: "SET_SEARCH_TERM", payload: "" });
+    dispatch({ type: 'SET_SEARCH_TERM', payload: '' });
   };
 
   // Handle completed filter change
-  const handleCompletedFilterChange = (
-    e: React.ChangeEvent<HTMLSelectElement>
-  ) => {
-    dispatch({ type: "SET_COMPLETED_FILTER", payload: e.target.value });
+  const handleCompletedFilterChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    dispatch({ type: 'SET_COMPLETED_FILTER', payload: e.target.value });
   };
 
   // Handle due this week filter toggle
   const handleDueThisWeekToggle = () => {
     dispatch({
-      type: "SET_DUE_THIS_WEEK_FILTER",
+      type: 'SET_DUE_THIS_WEEK_FILTER',
       payload: !state.dueThisWeekFilter,
     });
   };
@@ -252,36 +239,33 @@ const Reminders = () => {
   // Handle page change
   const handlePageChange = (page: number) => {
     const newPagination = { ...state.pagination, page };
-    dispatch({ type: "SET_PAGINATION", payload: newPagination });
+    dispatch({ type: 'SET_PAGINATION', payload: newPagination });
   };
 
   // Handle opening the modal for adding a new reminder
   const handleAddReminder = () => {
-    dispatch({ type: "TOGGLE_MODAL" });
+    dispatch({ type: 'TOGGLE_MODAL' });
   };
 
   // Handle opening the modal for editing an existing reminder
   const handleEditReminder = (reminder: ReminderType) => {
-    dispatch({ type: "TOGGLE_MODAL", payload: reminder });
+    dispatch({ type: 'TOGGLE_MODAL', payload: reminder });
   };
 
   // Handle form submission
   const handleSubmitReminder = async (data: ReminderFormData) => {
-    dispatch({ type: "SET_SUBMITTING", payload: true });
+    dispatch({ type: 'SET_SUBMITTING', payload: true });
 
     try {
       if (state.currentReminder) {
         // Update existing reminder
-        const response = await reminderService.update(
-          state.currentReminder.id,
-          data
-        );
+        const response = await reminderService.update(state.currentReminder.id, data);
 
-        dispatch({ type: "UPDATE_REMINDER", payload: response.reminder });
+        dispatch({ type: 'UPDATE_REMINDER', payload: response.reminder });
 
         Swal.fire({
-          icon: "success",
-          title: "Reminder updated successfully",
+          icon: 'success',
+          title: 'Reminder updated successfully',
           showConfirmButton: false,
           timer: 2000,
         });
@@ -289,62 +273,58 @@ const Reminders = () => {
         // Create new reminder
         const response = await reminderService.create(data);
 
-        dispatch({ type: "ADD_REMINDER", payload: response.reminder });
+        dispatch({ type: 'ADD_REMINDER', payload: response.reminder });
 
         Swal.fire({
-          icon: "success",
-          title: "Reminder created successfully",
+          icon: 'success',
+          title: 'Reminder created successfully',
           showConfirmButton: false,
           timer: 2000,
         });
       }
     } catch (error) {
-      const errorMessage =
-        error instanceof Error ? error.message : "Operation failed";
+      const errorMessage = error instanceof Error ? error.message : 'Operation failed';
       Swal.fire({
-        icon: "error",
-        title: "Operation failed",
+        icon: 'error',
+        title: 'Operation failed',
         text: errorMessage,
         showConfirmButton: false,
         timer: 2000,
       });
-      console.error("Error submitting reminder:", error);
-      dispatch({ type: "SET_SUBMITTING", payload: false });
+      console.error('Error submitting reminder:', error);
+      dispatch({ type: 'SET_SUBMITTING', payload: false });
     }
   };
 
   // Handle reminder deletion
   const handleDeleteReminder = async (id: string) => {
     Swal.fire({
-      icon: "warning",
-      title: "Are you sure?",
+      icon: 'warning',
+      title: 'Are you sure?',
       text: "You won't be able to revert this!",
       showCancelButton: true,
-      confirmButtonColor: "#3085d6",
-      cancelButtonColor: "#d33",
-      confirmButtonText: "Yes, delete it!",
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#d33',
+      confirmButtonText: 'Yes, delete it!',
     }).then(async (result) => {
       if (result.isConfirmed) {
         try {
           await reminderService.delete(id);
 
-          dispatch({ type: "DELETE_REMINDER", payload: id });
+          dispatch({ type: 'DELETE_REMINDER', payload: id });
 
           Swal.fire({
-            icon: "success",
-            title: "Deleted!",
-            text: "Reminder deleted successfully.",
+            icon: 'success',
+            title: 'Deleted!',
+            text: 'Reminder deleted successfully.',
             showConfirmButton: false,
             timer: 2000,
           });
         } catch (error) {
-          const errorMessage =
-            error instanceof Error
-              ? error.message
-              : "Failed to delete reminder";
+          const errorMessage = error instanceof Error ? error.message : 'Failed to delete reminder';
           Swal.fire({
-            icon: "error",
-            title: "Failed to delete reminder",
+            icon: 'error',
+            title: 'Failed to delete reminder',
             text: errorMessage,
             showConfirmButton: false,
             timer: 2000,
@@ -358,28 +338,26 @@ const Reminders = () => {
   const handleToggleCompleted = async (id: string, currentStatus: boolean) => {
     try {
       const newStatus = !currentStatus;
-      
+
       await reminderService.update(id, { completed: newStatus });
-      
+
       dispatch({
-        type: "TOGGLE_REMINDER_COMPLETED",
+        type: 'TOGGLE_REMINDER_COMPLETED',
         payload: { id, completed: newStatus },
       });
-      
+
       Swal.fire({
-        icon: "success",
-        title: newStatus ? "Reminder marked as completed" : "Reminder marked as pending",
+        icon: 'success',
+        title: newStatus ? 'Reminder marked as completed' : 'Reminder marked as pending',
         showConfirmButton: false,
         timer: 1500,
       });
     } catch (error) {
       const errorMessage =
-        error instanceof Error
-          ? error.message
-          : "Failed to update reminder status";
+        error instanceof Error ? error.message : 'Failed to update reminder status';
       Swal.fire({
-        icon: "error",
-        title: "Failed to update reminder status",
+        icon: 'error',
+        title: 'Failed to update reminder status',
         text: errorMessage,
         showConfirmButton: false,
         timer: 2000,
@@ -450,8 +428,8 @@ const Reminders = () => {
             onClick={handleDueThisWeekToggle}
             className={`flex items-center justify-center w-full py-2 px-4 border rounded-md transition-colors ${
               state.dueThisWeekFilter
-                ? "bg-blue-100 border-blue-500 text-blue-700 dark:bg-blue-900 dark:border-blue-400 dark:text-blue-200"
-                : "bg-white border-gray-300 text-gray-700 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-300"
+                ? 'bg-blue-100 border-blue-500 text-blue-700 dark:bg-blue-900 dark:border-blue-400 dark:text-blue-200'
+                : 'bg-white border-gray-300 text-gray-700 dark:bg-gray-800 dark:border-gray-600 dark:text-gray-300'
             }`}
           >
             <FiClock className="mr-2" /> Due This Week
@@ -469,8 +447,7 @@ const Reminders = () => {
           <div className="p-6 text-center text-red-500">{state.error}</div>
         ) : state.reminders.length === 0 ? (
           <div className="p-6 text-center text-gray-500 dark:text-gray-400">
-            No reminders found. Create your first reminder by clicking the "Add
-            Reminder" button.
+            No reminders found. Create your first reminder by clicking the "Add Reminder" button.
           </div>
         ) : (
           <div>
@@ -501,22 +478,17 @@ const Reminders = () => {
                       key={reminder.id}
                       className={`hover:bg-gray-50 dark:hover:bg-gray-700 ${
                         isOverdue(reminder.dueDate, reminder.completed)
-                          ? "bg-red-50 dark:bg-red-900/20"
-                          : ""
+                          ? 'bg-red-50 dark:bg-red-900/20'
+                          : ''
                       }`}
                     >
                       <td className="px-6 py-4 whitespace-nowrap">
                         <button
-                          onClick={() =>
-                            handleToggleCompleted(
-                              reminder.id,
-                              reminder.completed
-                            )
-                          }
+                          onClick={() => handleToggleCompleted(reminder.id, reminder.completed)}
                           className={`p-1 rounded-full ${
                             reminder.completed
-                              ? "text-green-600 bg-green-100 dark:text-green-400 dark:bg-green-900/30"
-                              : "text-gray-400 bg-gray-100 dark:text-gray-500 dark:bg-gray-700"
+                              ? 'text-green-600 bg-green-100 dark:text-green-400 dark:bg-green-900/30'
+                              : 'text-gray-400 bg-gray-100 dark:text-gray-500 dark:bg-gray-700'
                           }`}
                         >
                           <FiCheck className="h-5 w-5" />
@@ -535,8 +507,8 @@ const Reminders = () => {
                       <td
                         className={`px-6 py-4 whitespace-nowrap text-sm ${
                           isOverdue(reminder.dueDate, reminder.completed)
-                            ? "text-red-600 dark:text-red-400 font-medium"
-                            : "text-gray-500 dark:text-gray-400"
+                            ? 'text-red-600 dark:text-red-400 font-medium'
+                            : 'text-gray-500 dark:text-gray-400'
                         }`}
                       >
                         <div className="flex items-center">
@@ -553,13 +525,13 @@ const Reminders = () => {
                         {reminder.clientId && (
                           <div className="flex items-center text-blue-600 dark:text-blue-400">
                             <FiUsers className="mr-1" />
-                            {reminder.clientName || "Client"}
+                            {reminder.clientName || 'Client'}
                           </div>
                         )}
                         {reminder.projectId && (
                           <div className="flex items-center text-green-600 dark:text-green-400 mt-1">
                             <FiFolder className="mr-1" />
-                            {reminder.projectTitle || "Project"}
+                            {reminder.projectTitle || 'Project'}
                           </div>
                         )}
                       </td>
@@ -600,12 +572,12 @@ const Reminders = () => {
       {/* Reminder Form Modal */}
       <Modal
         isOpen={state.isModalOpen}
-        onClose={() => dispatch({ type: "TOGGLE_MODAL" })}
-        title={state.currentReminder ? "Edit Reminder" : "Add New Reminder"}
+        onClose={() => dispatch({ type: 'TOGGLE_MODAL' })}
+        title={state.currentReminder ? 'Edit Reminder' : 'Add New Reminder'}
       >
         <ReminderForm
           onSubmit={handleSubmitReminder}
-          onCancel={() => dispatch({ type: "TOGGLE_MODAL" })}
+          onCancel={() => dispatch({ type: 'TOGGLE_MODAL' })}
           initialData={state.currentReminder || {}}
           isSubmitting={state.isSubmitting}
         />

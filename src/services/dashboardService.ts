@@ -1,5 +1,5 @@
-import apiClient from "./apiClient";
-import { ProjectStatus } from "./projectService";
+import apiClient from './apiClient';
+import { ProjectStatus } from './projectService';
 
 // Enhanced interfaces for dashboard data with additional fields needed for display
 export interface DashboardReminder {
@@ -62,7 +62,7 @@ export interface DashboardResponse {
 
 const dashboardService = {
   getData: async (): Promise<DashboardResponse> => {
-    const response = await apiClient.get("/api/dashboard");
+    const response = await apiClient.get('/api/dashboard');
     return response.data;
   },
 };

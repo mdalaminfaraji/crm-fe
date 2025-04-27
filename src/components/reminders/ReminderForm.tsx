@@ -1,13 +1,8 @@
-import { useState, useEffect } from "react";
-import { useForm } from "react-hook-form";
-import clientService, { Client } from "../../services/clientService";
-import projectService, { Project } from "../../services/projectService";
-import {
-  InputField,
-  TextareaField,
-  SelectField,
-  DatePickerField,
-} from "../common";
+import { useState, useEffect } from 'react';
+import { useForm } from 'react-hook-form';
+import clientService, { Client } from '../../services/clientService';
+import projectService, { Project } from '../../services/projectService';
+import { InputField, TextareaField, SelectField, DatePickerField } from '../common';
 
 export interface ReminderFormData {
   title: string;
@@ -39,12 +34,10 @@ const ReminderForm = ({
   } = useForm<ReminderFormData>({
     defaultValues: {
       ...initialData,
-      dueDate: initialData.dueDate
-        ? new Date(initialData.dueDate as string)
-        : new Date(),
+      dueDate: initialData.dueDate ? new Date(initialData.dueDate as string) : new Date(),
       completed: initialData.completed || false,
     },
-    mode: "onSubmit",
+    mode: 'onSubmit',
   });
 
   const [clients, setClients] = useState<Client[]>([]);
@@ -60,7 +53,7 @@ const ReminderForm = ({
         const response = await clientService.getAll();
         setClients(response.clients);
       } catch (error) {
-        console.error("Error fetching clients:", error);
+        console.error('Error fetching clients:', error);
       } finally {
         setIsLoadingClients(false);
       }
@@ -72,7 +65,7 @@ const ReminderForm = ({
         const response = await projectService.getAll();
         setProjects(response.projects);
       } catch (error) {
-        console.error("Error fetching projects:", error);
+        console.error('Error fetching projects:', error);
       } finally {
         setIsLoadingProjects(false);
       }
@@ -87,7 +80,7 @@ const ReminderForm = ({
       ...data,
       dueDate:
         data.dueDate instanceof Date
-          ? data.dueDate.toISOString().split("T")[0]
+          ? data.dueDate.toISOString().split('T')[0]
           : String(data.dueDate),
     };
 
@@ -95,7 +88,7 @@ const ReminderForm = ({
   };
 
   const onError = (errors: Record<string, unknown>) => {
-    console.error("Form validation errors:", errors);
+    console.error('Form validation errors:', errors);
   };
 
   return (
@@ -165,7 +158,7 @@ const ReminderForm = ({
             type="checkbox"
             id="completed"
             className="h-4 w-4 rounded border-gray-300 dark:border-gray-600 text-blue-600 focus:ring-blue-500"
-            {...register("completed")}
+            {...register('completed')}
           />
           <label
             htmlFor="completed"
@@ -197,12 +190,8 @@ const ReminderForm = ({
         >
           Cancel
         </button>
-        <button
-          type="submit"
-          disabled={isSubmitting}
-          className="btn btn-primary"
-        >
-          {isSubmitting ? "Saving..." : "Save"}
+        <button type="submit" disabled={isSubmitting} className="btn btn-primary">
+          {isSubmitting ? 'Saving...' : 'Save'}
         </button>
       </div>
     </form>

@@ -1,4 +1,4 @@
-import apiClient from "./apiClient";
+import apiClient from './apiClient';
 
 export interface Client {
   id: string;
@@ -53,7 +53,7 @@ export interface ClientSearchParams {
 const clientService = {
   getAll: async (params?: ClientSearchParams): Promise<ClientsResponse> => {
     const queryParams = new URLSearchParams();
-    
+
     if (params) {
       if (params.page) queryParams.append('page', params.page.toString());
       if (params.limit) queryParams.append('limit', params.limit.toString());
@@ -61,7 +61,7 @@ const clientService = {
       if (params.sortBy) queryParams.append('sortBy', params.sortBy);
       if (params.sortOrder) queryParams.append('sortOrder', params.sortOrder);
     }
-    
+
     const url = `/api/clients${queryParams.toString() ? `?${queryParams.toString()}` : ''}`;
     const response = await apiClient.get(url);
     return response.data;
@@ -73,14 +73,11 @@ const clientService = {
   },
 
   create: async (clientData: ClientRequest): Promise<ClientResponse> => {
-    const response = await apiClient.post("/api/clients", clientData);
+    const response = await apiClient.post('/api/clients', clientData);
     return response.data;
   },
 
-  update: async (
-    id: string,
-    clientData: Partial<ClientRequest>
-  ): Promise<ClientResponse> => {
+  update: async (id: string, clientData: Partial<ClientRequest>): Promise<ClientResponse> => {
     const response = await apiClient.put(`/api/clients/${id}`, clientData);
     return response.data;
   },

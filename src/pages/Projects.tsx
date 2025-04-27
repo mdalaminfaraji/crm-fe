@@ -1,26 +1,17 @@
-import { useEffect, useCallback } from "react";
-import {
-  FiPlus,
-  FiEdit2,
-  FiTrash2,
-  FiSearch,
-  FiFilter,
-  FiX,
-} from "react-icons/fi";
-import Modal from "../components/common/Modal";
-import ProjectForm, {
-  ProjectFormData,
-} from "../components/projects/ProjectForm";
+import { useEffect, useCallback } from 'react';
+import { FiPlus, FiEdit2, FiTrash2, FiSearch, FiFilter, FiX } from 'react-icons/fi';
+import Modal from '../components/common/Modal';
+import ProjectForm, { ProjectFormData } from '../components/projects/ProjectForm';
 import projectService, {
   Project as ProjectType,
   ProjectStatus,
   ProjectSearchParams,
   PaginationData,
-} from "../services/projectService";
-import Pagination from "../components/common/Pagination";
-import useDebounce from "../hooks/useDebounce";
-import { useImmerReducer } from "use-immer";
-import Swal from "sweetalert2";
+} from '../services/projectService';
+import Pagination from '../components/common/Pagination';
+import useDebounce from '../hooks/useDebounce';
+import { useImmerReducer } from 'use-immer';
+import Swal from 'sweetalert2';
 
 // State interface
 interface ProjectsState {
@@ -37,28 +28,28 @@ interface ProjectsState {
 
 // Action types
 type ProjectsAction =
-  | { type: "FETCH_PROJECTS_START" }
+  | { type: 'FETCH_PROJECTS_START' }
   | {
-      type: "FETCH_PROJECTS_SUCCESS";
+      type: 'FETCH_PROJECTS_SUCCESS';
       payload: { projects: ProjectType[]; pagination: PaginationData };
     }
-  | { type: "FETCH_PROJECTS_ERROR"; payload: string }
-  | { type: "SET_SEARCH_TERM"; payload: string }
-  | { type: "SET_STATUS_FILTER"; payload: string }
-  | { type: "TOGGLE_MODAL"; payload?: ProjectType | null }
-  | { type: "SET_SUBMITTING"; payload: boolean }
-  | { type: "ADD_PROJECT"; payload: ProjectType }
-  | { type: "UPDATE_PROJECT"; payload: ProjectType }
-  | { type: "DELETE_PROJECT"; payload: string }
-  | { type: "SET_PAGINATION"; payload: PaginationData };
+  | { type: 'FETCH_PROJECTS_ERROR'; payload: string }
+  | { type: 'SET_SEARCH_TERM'; payload: string }
+  | { type: 'SET_STATUS_FILTER'; payload: string }
+  | { type: 'TOGGLE_MODAL'; payload?: ProjectType | null }
+  | { type: 'SET_SUBMITTING'; payload: boolean }
+  | { type: 'ADD_PROJECT'; payload: ProjectType }
+  | { type: 'UPDATE_PROJECT'; payload: ProjectType }
+  | { type: 'DELETE_PROJECT'; payload: string }
+  | { type: 'SET_PAGINATION'; payload: PaginationData };
 
 // Initial state
 const initialState: ProjectsState = {
   projects: [],
   isLoading: false,
   error: null,
-  searchTerm: "",
-  statusFilter: "",
+  searchTerm: '',
+  statusFilter: '',
   isModalOpen: false,
   isSubmitting: false,
   currentProject: null,
@@ -75,47 +66,47 @@ const initialState: ProjectsState = {
 // Reducer function
 const projectsReducer = (draft: ProjectsState, action: ProjectsAction) => {
   switch (action.type) {
-    case "FETCH_PROJECTS_START":
+    case 'FETCH_PROJECTS_START':
       draft.isLoading = true;
       draft.error = null;
       break;
-    case "FETCH_PROJECTS_SUCCESS":
+    case 'FETCH_PROJECTS_SUCCESS':
       draft.projects = action.payload.projects;
       draft.pagination = action.payload.pagination;
       draft.isLoading = false;
       break;
-    case "FETCH_PROJECTS_ERROR":
+    case 'FETCH_PROJECTS_ERROR':
       draft.error = action.payload;
       draft.isLoading = false;
       break;
-    case "SET_SEARCH_TERM":
+    case 'SET_SEARCH_TERM':
       draft.searchTerm = action.payload;
       if (draft.pagination.page !== 1) {
         draft.pagination.page = 1;
       }
       break;
-    case "SET_STATUS_FILTER":
+    case 'SET_STATUS_FILTER':
       draft.statusFilter = action.payload;
       if (draft.pagination.page !== 1) {
         draft.pagination.page = 1;
       }
       break;
-    case "SET_PAGINATION":
+    case 'SET_PAGINATION':
       draft.pagination = action.payload;
       break;
-    case "TOGGLE_MODAL":
+    case 'TOGGLE_MODAL':
       draft.isModalOpen = !draft.isModalOpen;
       draft.currentProject = action.payload || null;
       break;
-    case "SET_SUBMITTING":
+    case 'SET_SUBMITTING':
       draft.isSubmitting = action.payload;
       break;
-    case "ADD_PROJECT":
+    case 'ADD_PROJECT':
       draft.projects.unshift(action.payload);
       draft.isModalOpen = false;
       draft.isSubmitting = false;
       break;
-    case "UPDATE_PROJECT": {
+    case 'UPDATE_PROJECT': {
       const index = draft.projects.findIndex((p) => p.id === action.payload.id);
       if (index !== -1) {
         draft.projects[index] = action.payload;
@@ -124,7 +115,7 @@ const projectsReducer = (draft: ProjectsState, action: ProjectsAction) => {
       draft.isSubmitting = false;
       break;
     }
-    case "DELETE_PROJECT":
+    case 'DELETE_PROJECT':
       draft.projects = draft.projects.filter((p) => p.id !== action.payload);
       break;
     default:
@@ -143,36 +134,35 @@ const Projects = () => {
   // Memoize pagination values to avoid reference issues
   const paginationPage = state.pagination.page;
   const paginationLimit = state.pagination.limit;
-  
+
   const fetchProjects = useCallback(async () => {
     try {
-      dispatch({ type: "FETCH_PROJECTS_START" });
+      dispatch({ type: 'FETCH_PROJECTS_START' });
 
       const searchParams: ProjectSearchParams = {
         page: state.pagination.page,
         limit: state.pagination.limit,
         search: debouncedSearchTerm,
         status: (state.statusFilter as ProjectStatus) || undefined,
-        sortBy: "createdAt",
-        sortOrder: "desc",
+        sortBy: 'createdAt',
+        sortOrder: 'desc',
       };
 
       const response = await projectService.getAll(searchParams);
 
       dispatch({
-        type: "FETCH_PROJECTS_SUCCESS",
+        type: 'FETCH_PROJECTS_SUCCESS',
         payload: {
           projects: response.projects,
           pagination: response.pagination || state.pagination,
         },
       });
     } catch (error) {
-      const errorMessage =
-        error instanceof Error ? error.message : "Failed to fetch projects";
-      dispatch({ type: "FETCH_PROJECTS_ERROR", payload: errorMessage });
+      const errorMessage = error instanceof Error ? error.message : 'Failed to fetch projects';
+      dispatch({ type: 'FETCH_PROJECTS_ERROR', payload: errorMessage });
       Swal.fire({
-        icon: "error",
-        title: "Failed to fetch projects",
+        icon: 'error',
+        title: 'Failed to fetch projects',
         text: errorMessage,
         showConfirmButton: false,
         timer: 2000,
@@ -193,63 +183,58 @@ const Projects = () => {
 
   // Format currency for display
   const formatCurrency = (amount?: number) => {
-    if (amount === undefined || amount === null) return "-";
-    return new Intl.NumberFormat("en-US", {
-      style: "currency",
-      currency: "USD",
+    if (amount === undefined || amount === null) return '-';
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD',
     }).format(amount);
   };
 
   // Handle search input change
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    dispatch({ type: "SET_SEARCH_TERM", payload: e.target.value });
+    dispatch({ type: 'SET_SEARCH_TERM', payload: e.target.value });
   };
 
   // Clear search
   const handleClearSearch = () => {
-    dispatch({ type: "SET_SEARCH_TERM", payload: "" });
+    dispatch({ type: 'SET_SEARCH_TERM', payload: '' });
   };
 
   // Handle status filter change
-  const handleStatusFilterChange = (
-    e: React.ChangeEvent<HTMLSelectElement>
-  ) => {
-    dispatch({ type: "SET_STATUS_FILTER", payload: e.target.value });
+  const handleStatusFilterChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    dispatch({ type: 'SET_STATUS_FILTER', payload: e.target.value });
   };
 
   // Handle page change
   const handlePageChange = (page: number) => {
     const newPagination = { ...state.pagination, page };
-    dispatch({ type: "SET_PAGINATION", payload: newPagination });
+    dispatch({ type: 'SET_PAGINATION', payload: newPagination });
   };
 
   // Handle opening the modal for adding a new project
   const handleAddProject = () => {
-    dispatch({ type: "TOGGLE_MODAL" });
+    dispatch({ type: 'TOGGLE_MODAL' });
   };
 
   // Handle opening the modal for editing an existing project
   const handleEditProject = (project: ProjectType) => {
-    dispatch({ type: "TOGGLE_MODAL", payload: project });
+    dispatch({ type: 'TOGGLE_MODAL', payload: project });
   };
 
   // Handle form submission
   const handleSubmitProject = async (data: ProjectFormData) => {
-    dispatch({ type: "SET_SUBMITTING", payload: true });
+    dispatch({ type: 'SET_SUBMITTING', payload: true });
 
     try {
       if (state.currentProject) {
         // Update existing project
-        const response = await projectService.update(
-          state.currentProject.id,
-          data
-        );
+        const response = await projectService.update(state.currentProject.id, data);
 
-        dispatch({ type: "UPDATE_PROJECT", payload: response.project });
+        dispatch({ type: 'UPDATE_PROJECT', payload: response.project });
 
         Swal.fire({
-          icon: "success",
-          title: "Project updated successfully",
+          icon: 'success',
+          title: 'Project updated successfully',
           showConfirmButton: false,
           timer: 2000,
         });
@@ -257,60 +242,58 @@ const Projects = () => {
         // Create new project
         const response = await projectService.create(data);
 
-        dispatch({ type: "ADD_PROJECT", payload: response.project });
+        dispatch({ type: 'ADD_PROJECT', payload: response.project });
 
         Swal.fire({
-          icon: "success",
-          title: "Project created successfully",
+          icon: 'success',
+          title: 'Project created successfully',
           showConfirmButton: false,
           timer: 2000,
         });
       }
     } catch (error) {
-      const errorMessage =
-        error instanceof Error ? error.message : "Operation failed";
+      const errorMessage = error instanceof Error ? error.message : 'Operation failed';
       Swal.fire({
-        icon: "error",
-        title: "Operation failed",
+        icon: 'error',
+        title: 'Operation failed',
         text: errorMessage,
         showConfirmButton: false,
         timer: 2000,
       });
-      console.error("Error submitting project:", error);
-      dispatch({ type: "SET_SUBMITTING", payload: false });
+      console.error('Error submitting project:', error);
+      dispatch({ type: 'SET_SUBMITTING', payload: false });
     }
   };
 
   // Handle project deletion
   const handleDeleteProject = async (id: string) => {
     Swal.fire({
-      icon: "warning",
-      title: "Are you sure?",
+      icon: 'warning',
+      title: 'Are you sure?',
       text: "You won't be able to revert this!",
       showCancelButton: true,
-      confirmButtonColor: "#3085d6",
-      cancelButtonColor: "#d33",
-      confirmButtonText: "Yes, delete it!",
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#d33',
+      confirmButtonText: 'Yes, delete it!',
     }).then(async (result) => {
       if (result.isConfirmed) {
         try {
           await projectService.delete(id);
 
-          dispatch({ type: "DELETE_PROJECT", payload: id });
+          dispatch({ type: 'DELETE_PROJECT', payload: id });
 
           Swal.fire({
-            icon: "success",
-            title: "Deleted!",
-            text: "Project deleted successfully.",
+            icon: 'success',
+            title: 'Deleted!',
+            text: 'Project deleted successfully.',
             showConfirmButton: false,
             timer: 2000,
           });
         } catch (error) {
-          const errorMessage =
-            error instanceof Error ? error.message : "Failed to delete project";
+          const errorMessage = error instanceof Error ? error.message : 'Failed to delete project';
           Swal.fire({
-            icon: "error",
-            title: "Failed to delete project",
+            icon: 'error',
+            title: 'Failed to delete project',
             text: errorMessage,
             showConfirmButton: false,
             timer: 2000,
@@ -377,9 +360,7 @@ const Projects = () => {
         {state.isLoading ? (
           <div className="p-6 text-center">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto"></div>
-            <p className="mt-4 text-gray-600 dark:text-gray-400">
-              Loading projects...
-            </p>
+            <p className="mt-4 text-gray-600 dark:text-gray-400">Loading projects...</p>
           </div>
         ) : state.error ? (
           <div className="p-6 text-center">
@@ -396,11 +377,8 @@ const Projects = () => {
             <p className="text-gray-600 dark:text-gray-400">
               {state.searchTerm || state.statusFilter
                 ? `No projects found matching your criteria. Try different search terms or filters or`
-                : "No projects found."}
-              <button
-                onClick={handleAddProject}
-                className="text-blue-500 hover:underline ml-1"
-              >
+                : 'No projects found.'}
+              <button onClick={handleAddProject} className="text-blue-500 hover:underline ml-1">
                 add a new project
               </button>
               .
@@ -437,10 +415,7 @@ const Projects = () => {
                 </thead>
                 <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
                   {state.projects.map((project) => (
-                    <tr
-                      key={project.id}
-                      className="hover:bg-gray-50 dark:hover:bg-gray-700"
-                    >
+                    <tr key={project.id} className="hover:bg-gray-50 dark:hover:bg-gray-700">
                       <td className="px-6 py-4 whitespace-nowrap">
                         <div className="font-medium text-gray-900 dark:text-white">
                           {project.title}
@@ -457,7 +432,7 @@ const Projects = () => {
                       <td className="px-6 py-4 whitespace-nowrap">
                         <span
                           className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusColor(
-                            project.status
+                            project.status,
                           )}`}
                         >
                           {formatStatus(project.status)}
@@ -467,7 +442,7 @@ const Projects = () => {
                         {formatCurrency(project.budget)}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                        {project.deadline ? formatDate(project.deadline) : "-"}
+                        {project.deadline ? formatDate(project.deadline) : '-'}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
                         {formatDate(project.createdAt)}
@@ -509,12 +484,12 @@ const Projects = () => {
       {/* Project Form Modal */}
       <Modal
         isOpen={state.isModalOpen}
-        onClose={() => dispatch({ type: "TOGGLE_MODAL" })}
-        title={state.currentProject ? "Edit Project" : "Add New Project"}
+        onClose={() => dispatch({ type: 'TOGGLE_MODAL' })}
+        title={state.currentProject ? 'Edit Project' : 'Add New Project'}
       >
         <ProjectForm
           onSubmit={handleSubmitProject}
-          onCancel={() => dispatch({ type: "TOGGLE_MODAL" })}
+          onCancel={() => dispatch({ type: 'TOGGLE_MODAL' })}
           initialData={state.currentProject || {}}
           isSubmitting={state.isSubmitting}
         />
@@ -526,15 +501,15 @@ const Projects = () => {
 const formatStatus = (status: string): string => {
   switch (status) {
     case ProjectStatus.NOT_STARTED:
-      return "Not Started";
+      return 'Not Started';
     case ProjectStatus.IN_PROGRESS:
-      return "In Progress";
+      return 'In Progress';
     case ProjectStatus.ON_HOLD:
-      return "On Hold";
+      return 'On Hold';
     case ProjectStatus.COMPLETED:
-      return "Completed";
+      return 'Completed';
     case ProjectStatus.CANCELLED:
-      return "Cancelled";
+      return 'Cancelled';
     default:
       return status;
   }
@@ -543,17 +518,17 @@ const formatStatus = (status: string): string => {
 const getStatusColor = (status: string): string => {
   switch (status) {
     case ProjectStatus.NOT_STARTED:
-      return "bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300";
+      return 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300';
     case ProjectStatus.IN_PROGRESS:
-      return "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300";
+      return 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300';
     case ProjectStatus.ON_HOLD:
-      return "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300";
+      return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300';
     case ProjectStatus.COMPLETED:
-      return "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300";
+      return 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300';
     case ProjectStatus.CANCELLED:
-      return "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300";
+      return 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300';
     default:
-      return "bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300";
+      return 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300';
   }
 };
 

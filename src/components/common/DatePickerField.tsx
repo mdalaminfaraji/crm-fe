@@ -1,13 +1,7 @@
-import { useState } from "react";
-import ReactDatePicker from "react-datepicker";
-import "react-datepicker/dist/react-datepicker.css";
-import {
-  Control,
-  Controller,
-  FieldError,
-  FieldValues,
-  Path,
-} from "react-hook-form";
+import { useState } from 'react';
+import ReactDatePicker from 'react-datepicker';
+import 'react-datepicker/dist/react-datepicker.css';
+import { Control, Controller, FieldError, FieldValues, Path } from 'react-hook-form';
 
 interface DatePickerFieldProps<T extends FieldValues> {
   name: Path<T>;
@@ -28,7 +22,7 @@ const DatePickerField = <T extends FieldValues>({
   error,
   isRequired = false,
   disabled = false,
-  placeholderText = "Select date",
+  placeholderText = 'Select date',
   minDate,
   maxDate,
 }: DatePickerFieldProps<T>) => {
@@ -65,8 +59,8 @@ const DatePickerField = <T extends FieldValues>({
                 placeholderText={placeholderText}
                 className={`mt-1 p-2 block w-full rounded-md shadow-sm dark:bg-[#374151] dark:text-white ${
                   error
-                    ? "border-red-500 focus:border-red-500 focus:ring-red-500"
-                    : "border-gray-300 dark:border-gray-600 focus:border-blue-500 focus:ring-blue-500"
+                    ? 'border-red-500 focus:border-red-500 focus:ring-red-500'
+                    : 'border-gray-300 dark:border-gray-600 focus:border-blue-500 focus:ring-blue-500'
                 }`}
                 dateFormat="yyyy-MM-dd"
                 minDate={minDate}

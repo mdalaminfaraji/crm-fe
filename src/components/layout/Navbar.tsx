@@ -1,8 +1,8 @@
-import { useState, useEffect, useRef } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import { FiMenu, FiBell, FiUser, FiLogOut, FiSettings } from "react-icons/fi";
-import ThemeToggle from "../common/ThemeToggle";
-import { useAuth } from "../../hooks/useAuth";
+import { useState, useEffect, useRef } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { FiMenu, FiBell, FiUser, FiLogOut, FiSettings } from 'react-icons/fi';
+import ThemeToggle from '../common/ThemeToggle';
+import { useAuth } from '../../hooks/useAuth';
 
 interface NavbarProps {
   toggleSidebar: () => void;
@@ -20,29 +20,23 @@ const Navbar = ({ toggleSidebar, isMobile }: NavbarProps) => {
 
   const handleLogout = async () => {
     await logout();
-    navigate("/login");
+    navigate('/login');
   };
 
   // Close dropdowns when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (
-        profileRef.current &&
-        !profileRef.current.contains(event.target as Node)
-      ) {
+      if (profileRef.current && !profileRef.current.contains(event.target as Node)) {
         setProfileOpen(false);
       }
-      if (
-        notificationsRef.current &&
-        !notificationsRef.current.contains(event.target as Node)
-      ) {
+      if (notificationsRef.current && !notificationsRef.current.contains(event.target as Node)) {
         setNotificationsOpen(false);
       }
     };
 
-    document.addEventListener("mousedown", handleClickOutside);
+    document.addEventListener('mousedown', handleClickOutside);
     return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener('mousedown', handleClickOutside);
     };
   }, []);
 
@@ -61,7 +55,7 @@ const Navbar = ({ toggleSidebar, isMobile }: NavbarProps) => {
 
         <div className="flex items-center space-x-2 md:space-x-4">
           {/* Dark mode toggle - hide on mobile */}
-          <ThemeToggle className={isMobile ? "hidden" : "flex"} />
+          <ThemeToggle className={isMobile ? 'hidden' : 'flex'} />
 
           {/* Notifications */}
           <div className="relative" ref={notificationsRef}>
@@ -100,7 +94,7 @@ const Navbar = ({ toggleSidebar, isMobile }: NavbarProps) => {
                 <FiUser className="h-5 w-5 text-gray-600 dark:text-gray-300" />
               </div>
               <span className="ml-2 text-sm font-medium text-gray-700 dark:text-gray-300 hidden md:block">
-                {user?.firstName || "User"}
+                {user?.firstName || 'User'}
               </span>
             </button>
 
@@ -111,9 +105,7 @@ const Navbar = ({ toggleSidebar, isMobile }: NavbarProps) => {
                   <p className="font-medium">
                     {user?.firstName} {user?.lastName}
                   </p>
-                  <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
-                    {user?.email}
-                  </p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 truncate">{user?.email}</p>
                 </div>
                 <Link
                   to="/profile"
@@ -134,9 +126,7 @@ const Navbar = ({ toggleSidebar, isMobile }: NavbarProps) => {
                 {/* Show theme toggle on mobile */}
                 {isMobile && (
                   <div className="px-4 py-2 flex items-center justify-between border-t border-gray-200 dark:border-gray-700">
-                    <span className="text-sm text-gray-700 dark:text-gray-300">
-                      Dark Mode
-                    </span>
+                    <span className="text-sm text-gray-700 dark:text-gray-300">Dark Mode</span>
                     <ThemeToggle />
                   </div>
                 )}

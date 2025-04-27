@@ -1,4 +1,4 @@
-import { useEffect, useCallback } from "react";
+import { useEffect, useCallback } from 'react';
 import {
   FiPlus,
   FiEdit2,
@@ -10,20 +10,18 @@ import {
   FiMail,
   FiUsers,
   FiFolder,
-} from "react-icons/fi";
-import Modal from "../components/common/Modal";
-import InteractionForm, {
-  InteractionFormData,
-} from "../components/interactions/InteractionForm";
+} from 'react-icons/fi';
+import Modal from '../components/common/Modal';
+import InteractionForm, { InteractionFormData } from '../components/interactions/InteractionForm';
 import interactionService, {
   Interaction as InteractionType,
   InteractionType as InteractionTypeEnum,
-} from "../services/interactionService";
-import Pagination from "../components/common/Pagination";
-import useDebounce from "../hooks/useDebounce";
-import { useImmerReducer } from "use-immer";
-import { formatDate } from "../utils/formatters";
-import Swal from "sweetalert2";
+} from '../services/interactionService';
+import Pagination from '../components/common/Pagination';
+import useDebounce from '../hooks/useDebounce';
+import { useImmerReducer } from 'use-immer';
+import { formatDate } from '../utils/formatters';
+import Swal from 'sweetalert2';
 
 // Define pagination data interface
 interface PaginationData {
@@ -44,25 +42,25 @@ interface InteractionSearchParams {
   clientId?: string;
   projectId?: string;
   sortBy?: string;
-  sortOrder?: "asc" | "desc";
+  sortOrder?: 'asc' | 'desc';
 }
 
 // Action types
 type InteractionsAction =
-  | { type: "FETCH_INTERACTIONS_START" }
+  | { type: 'FETCH_INTERACTIONS_START' }
   | {
-      type: "FETCH_INTERACTIONS_SUCCESS";
+      type: 'FETCH_INTERACTIONS_SUCCESS';
       payload: { interactions: InteractionType[]; pagination: PaginationData };
     }
-  | { type: "FETCH_INTERACTIONS_ERROR"; payload: string }
-  | { type: "SET_SEARCH_TERM"; payload: string }
-  | { type: "SET_TYPE_FILTER"; payload: string }
-  | { type: "SET_PAGINATION"; payload: PaginationData }
-  | { type: "TOGGLE_MODAL"; payload?: InteractionType }
-  | { type: "SET_SUBMITTING"; payload: boolean }
-  | { type: "ADD_INTERACTION"; payload: InteractionType }
-  | { type: "UPDATE_INTERACTION"; payload: InteractionType }
-  | { type: "DELETE_INTERACTION"; payload: string };
+  | { type: 'FETCH_INTERACTIONS_ERROR'; payload: string }
+  | { type: 'SET_SEARCH_TERM'; payload: string }
+  | { type: 'SET_TYPE_FILTER'; payload: string }
+  | { type: 'SET_PAGINATION'; payload: PaginationData }
+  | { type: 'TOGGLE_MODAL'; payload?: InteractionType }
+  | { type: 'SET_SUBMITTING'; payload: boolean }
+  | { type: 'ADD_INTERACTION'; payload: InteractionType }
+  | { type: 'UPDATE_INTERACTION'; payload: InteractionType }
+  | { type: 'DELETE_INTERACTION'; payload: string };
 
 // State interface
 interface InteractionsState {
@@ -82,8 +80,8 @@ const initialState: InteractionsState = {
   interactions: [],
   isLoading: false,
   error: null,
-  searchTerm: "",
-  typeFilter: "",
+  searchTerm: '',
+  typeFilter: '',
   pagination: {
     page: 1,
     limit: 10,
@@ -98,55 +96,50 @@ const initialState: InteractionsState = {
 };
 
 // Reducer function
-const interactionsReducer = (
-  draft: InteractionsState,
-  action: InteractionsAction
-) => {
+const interactionsReducer = (draft: InteractionsState, action: InteractionsAction) => {
   switch (action.type) {
-    case "FETCH_INTERACTIONS_START":
+    case 'FETCH_INTERACTIONS_START':
       draft.isLoading = true;
       draft.error = null;
       break;
-    case "FETCH_INTERACTIONS_SUCCESS":
+    case 'FETCH_INTERACTIONS_SUCCESS':
       draft.isLoading = false;
       draft.interactions = action.payload.interactions;
       draft.pagination = action.payload.pagination;
       break;
-    case "FETCH_INTERACTIONS_ERROR":
+    case 'FETCH_INTERACTIONS_ERROR':
       draft.isLoading = false;
       draft.error = action.payload;
       break;
-    case "SET_SEARCH_TERM":
+    case 'SET_SEARCH_TERM':
       draft.searchTerm = action.payload;
       if (draft.pagination.page !== 1) {
         draft.pagination.page = 1;
       }
       break;
-    case "SET_TYPE_FILTER":
+    case 'SET_TYPE_FILTER':
       draft.typeFilter = action.payload;
       if (draft.pagination.page !== 1) {
         draft.pagination.page = 1;
       }
       break;
-    case "SET_PAGINATION":
+    case 'SET_PAGINATION':
       draft.pagination = action.payload;
       break;
-    case "TOGGLE_MODAL":
+    case 'TOGGLE_MODAL':
       draft.isModalOpen = !draft.isModalOpen;
       draft.currentInteraction = action.payload || null;
       break;
-    case "SET_SUBMITTING":
+    case 'SET_SUBMITTING':
       draft.isSubmitting = action.payload;
       break;
-    case "ADD_INTERACTION":
+    case 'ADD_INTERACTION':
       draft.interactions.unshift(action.payload);
       draft.isModalOpen = false;
       draft.isSubmitting = false;
       break;
-    case "UPDATE_INTERACTION": {
-      const index = draft.interactions.findIndex(
-        (i) => i.id === action.payload.id
-      );
+    case 'UPDATE_INTERACTION': {
+      const index = draft.interactions.findIndex((i) => i.id === action.payload.id);
       if (index !== -1) {
         draft.interactions[index] = action.payload;
       }
@@ -154,10 +147,8 @@ const interactionsReducer = (
       draft.isSubmitting = false;
       break;
     }
-    case "DELETE_INTERACTION":
-      draft.interactions = draft.interactions.filter(
-        (i) => i.id !== action.payload
-      );
+    case 'DELETE_INTERACTION':
+      draft.interactions = draft.interactions.filter((i) => i.id !== action.payload);
       break;
     default:
       break;
@@ -178,45 +169,38 @@ const Interactions = () => {
   // Fetch interactions data with search, filter, and pagination
   const fetchInteractions = useCallback(async () => {
     try {
-      dispatch({ type: "FETCH_INTERACTIONS_START" });
+      dispatch({ type: 'FETCH_INTERACTIONS_START' });
 
       const searchParams: InteractionSearchParams = {
         page: paginationPage,
         limit: paginationLimit,
         search: debouncedSearchTerm,
-        type: state.typeFilter as InteractionTypeEnum || undefined,
-        sortBy: "date",
-        sortOrder: "desc",
+        type: (state.typeFilter as InteractionTypeEnum) || undefined,
+        sortBy: 'date',
+        sortOrder: 'desc',
       };
 
       const response = await interactionService.getAll(searchParams);
 
       dispatch({
-        type: "FETCH_INTERACTIONS_SUCCESS",
+        type: 'FETCH_INTERACTIONS_SUCCESS',
         payload: {
           interactions: response.interactions,
           pagination: response.pagination || state.pagination,
         },
       });
     } catch (error) {
-      const errorMessage =
-        error instanceof Error ? error.message : "Failed to fetch interactions";
-      dispatch({ type: "FETCH_INTERACTIONS_ERROR", payload: errorMessage });
+      const errorMessage = error instanceof Error ? error.message : 'Failed to fetch interactions';
+      dispatch({ type: 'FETCH_INTERACTIONS_ERROR', payload: errorMessage });
       Swal.fire({
-        icon: "error",
-        title: "Failed to fetch interactions",
+        icon: 'error',
+        title: 'Failed to fetch interactions',
         text: errorMessage,
         showConfirmButton: false,
         timer: 2000,
       });
     }
-  }, [
-    dispatch,
-    paginationPage,
-    paginationLimit,
-    debouncedSearchTerm,
-    state.typeFilter,
-  ]);
+  }, [dispatch, paginationPage, paginationLimit, debouncedSearchTerm, state.typeFilter]);
 
   // Load interactions when component mounts and when dependencies change
   useEffect(() => {
@@ -226,52 +210,49 @@ const Interactions = () => {
 
   // Handle search input change
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    dispatch({ type: "SET_SEARCH_TERM", payload: e.target.value });
+    dispatch({ type: 'SET_SEARCH_TERM', payload: e.target.value });
   };
 
   // Clear search
   const handleClearSearch = () => {
-    dispatch({ type: "SET_SEARCH_TERM", payload: "" });
+    dispatch({ type: 'SET_SEARCH_TERM', payload: '' });
   };
 
   // Handle type filter change
   const handleTypeFilterChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    dispatch({ type: "SET_TYPE_FILTER", payload: e.target.value });
+    dispatch({ type: 'SET_TYPE_FILTER', payload: e.target.value });
   };
 
   // Handle page change
   const handlePageChange = (page: number) => {
     const newPagination = { ...state.pagination, page };
-    dispatch({ type: "SET_PAGINATION", payload: newPagination });
+    dispatch({ type: 'SET_PAGINATION', payload: newPagination });
   };
 
   // Handle opening the modal for adding a new interaction
   const handleAddInteraction = () => {
-    dispatch({ type: "TOGGLE_MODAL" });
+    dispatch({ type: 'TOGGLE_MODAL' });
   };
 
   // Handle opening the modal for editing an existing interaction
   const handleEditInteraction = (interaction: InteractionType) => {
-    dispatch({ type: "TOGGLE_MODAL", payload: interaction });
+    dispatch({ type: 'TOGGLE_MODAL', payload: interaction });
   };
 
   // Handle form submission
   const handleSubmitInteraction = async (data: InteractionFormData) => {
-    dispatch({ type: "SET_SUBMITTING", payload: true });
+    dispatch({ type: 'SET_SUBMITTING', payload: true });
 
     try {
       if (state.currentInteraction) {
         // Update existing interaction
-        const response = await interactionService.update(
-          state.currentInteraction.id,
-          data
-        );
+        const response = await interactionService.update(state.currentInteraction.id, data);
 
-        dispatch({ type: "UPDATE_INTERACTION", payload: response.interaction });
+        dispatch({ type: 'UPDATE_INTERACTION', payload: response.interaction });
 
         Swal.fire({
-          icon: "success",
-          title: "Interaction updated successfully",
+          icon: 'success',
+          title: 'Interaction updated successfully',
           showConfirmButton: false,
           timer: 2000,
         });
@@ -279,62 +260,59 @@ const Interactions = () => {
         // Create new interaction
         const response = await interactionService.create(data);
 
-        dispatch({ type: "ADD_INTERACTION", payload: response.interaction });
+        dispatch({ type: 'ADD_INTERACTION', payload: response.interaction });
 
         Swal.fire({
-          icon: "success",
-          title: "Interaction created successfully",
+          icon: 'success',
+          title: 'Interaction created successfully',
           showConfirmButton: false,
           timer: 2000,
         });
       }
     } catch (error) {
-      const errorMessage =
-        error instanceof Error ? error.message : "Operation failed";
+      const errorMessage = error instanceof Error ? error.message : 'Operation failed';
       Swal.fire({
-        icon: "error",
-        title: "Operation failed",
+        icon: 'error',
+        title: 'Operation failed',
         text: errorMessage,
         showConfirmButton: false,
         timer: 2000,
       });
-      console.error("Error submitting interaction:", error);
-      dispatch({ type: "SET_SUBMITTING", payload: false });
+      console.error('Error submitting interaction:', error);
+      dispatch({ type: 'SET_SUBMITTING', payload: false });
     }
   };
 
   // Handle interaction deletion
   const handleDeleteInteraction = async (id: string) => {
     Swal.fire({
-      icon: "warning",
-      title: "Are you sure?",
+      icon: 'warning',
+      title: 'Are you sure?',
       text: "You won't be able to revert this!",
       showCancelButton: true,
-      confirmButtonColor: "#3085d6",
-      cancelButtonColor: "#d33",
-      confirmButtonText: "Yes, delete it!",
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#d33',
+      confirmButtonText: 'Yes, delete it!',
     }).then(async (result) => {
       if (result.isConfirmed) {
         try {
           await interactionService.delete(id);
 
-          dispatch({ type: "DELETE_INTERACTION", payload: id });
+          dispatch({ type: 'DELETE_INTERACTION', payload: id });
 
           Swal.fire({
-            icon: "success",
-            title: "Deleted!",
-            text: "Interaction deleted successfully.",
+            icon: 'success',
+            title: 'Deleted!',
+            text: 'Interaction deleted successfully.',
             showConfirmButton: false,
             timer: 2000,
           });
         } catch (error) {
           const errorMessage =
-            error instanceof Error
-              ? error.message
-              : "Failed to delete interaction";
+            error instanceof Error ? error.message : 'Failed to delete interaction';
           Swal.fire({
-            icon: "error",
-            title: "Failed to delete interaction",
+            icon: 'error',
+            title: 'Failed to delete interaction',
             text: errorMessage,
             showConfirmButton: false,
             timer: 2000,
@@ -421,8 +399,8 @@ const Interactions = () => {
           <div className="p-6 text-center text-red-500">{state.error}</div>
         ) : state.interactions.length === 0 ? (
           <div className="p-6 text-center text-gray-500 dark:text-gray-400">
-            No interactions found. Create your first interaction by clicking the
-            "Add Interaction" button.
+            No interactions found. Create your first interaction by clicking the "Add Interaction"
+            button.
           </div>
         ) : (
           <div>
@@ -449,10 +427,7 @@ const Interactions = () => {
                 </thead>
                 <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
                   {state.interactions.map((interaction) => (
-                    <tr
-                      key={interaction.id}
-                      className="hover:bg-gray-50 dark:hover:bg-gray-700"
-                    >
+                    <tr key={interaction.id} className="hover:bg-gray-50 dark:hover:bg-gray-700">
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
                         {formatDate(interaction.date)}
                       </td>
@@ -466,20 +441,18 @@ const Interactions = () => {
                         {interaction.clientId && (
                           <div className="flex items-center text-blue-600 dark:text-blue-400">
                             <FiUsers className="mr-1" />
-                            {interaction.clientName || "Client"}
+                            {interaction.clientName || 'Client'}
                           </div>
                         )}
                         {interaction.projectId && (
                           <div className="flex items-center text-green-600 dark:text-green-400 mt-1">
                             <FiFolder className="mr-1" />
-                            {interaction.projectTitle || "Project"}
+                            {interaction.projectTitle || 'Project'}
                           </div>
                         )}
                       </td>
                       <td className="px-6 py-4 text-sm text-gray-500 dark:text-gray-400">
-                        <div className="max-w-xs truncate">
-                          {interaction.notes || "No notes"}
-                        </div>
+                        <div className="max-w-xs truncate">{interaction.notes || 'No notes'}</div>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                         <button
@@ -490,9 +463,7 @@ const Interactions = () => {
                         </button>
                         <button
                           className="text-red-600 dark:text-red-400 hover:text-red-900 dark:hover:text-red-300"
-                          onClick={() =>
-                            handleDeleteInteraction(interaction.id)
-                          }
+                          onClick={() => handleDeleteInteraction(interaction.id)}
                         >
                           <FiTrash2 className="h-4 w-4" />
                         </button>
@@ -520,14 +491,12 @@ const Interactions = () => {
       {/* Interaction Form Modal */}
       <Modal
         isOpen={state.isModalOpen}
-        onClose={() => dispatch({ type: "TOGGLE_MODAL" })}
-        title={
-          state.currentInteraction ? "Edit Interaction" : "Add New Interaction"
-        }
+        onClose={() => dispatch({ type: 'TOGGLE_MODAL' })}
+        title={state.currentInteraction ? 'Edit Interaction' : 'Add New Interaction'}
       >
         <InteractionForm
           onSubmit={handleSubmitInteraction}
-          onCancel={() => dispatch({ type: "TOGGLE_MODAL" })}
+          onCancel={() => dispatch({ type: 'TOGGLE_MODAL' })}
           initialData={state.currentInteraction || {}}
           isSubmitting={state.isSubmitting}
         />

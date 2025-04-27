@@ -1,8 +1,8 @@
-import "./index.css";
-import { BrowserRouter } from "react-router-dom";
-import { AppRouter } from "./routes";
-import { useTheme } from "./hooks/useTheme";
-import { useEffect } from "react";
+import './index.css';
+import { BrowserRouter } from 'react-router-dom';
+import { AppRouter } from './routes';
+import { useTheme } from './hooks/useTheme';
+import { useEffect } from 'react';
 function App() {
   const { theme } = useTheme();
   useEffect(() => {

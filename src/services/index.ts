@@ -1,10 +1,10 @@
-import apiClient from "./apiClient";
-import authService from "./authService";
-import clientService from "./clientService";
-import dashboardService from "./dashboardService";
-import interactionService from "./interactionService";
-import projectService from "./projectService";
-import reminderService from "./reminderService";
+import apiClient from './apiClient';
+import authService from './authService';
+import clientService from './clientService';
+import dashboardService from './dashboardService';
+import interactionService from './interactionService';
+import projectService from './projectService';
+import reminderService from './reminderService';
 
 export {
   apiClient,
@@ -13,5 +13,5 @@ export {
   dashboardService,
   interactionService,
   projectService,
-  reminderService
+  reminderService,
 };

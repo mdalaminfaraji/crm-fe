@@ -1,5 +1,5 @@
-import React from "react";
-import { FiChevronLeft, FiChevronRight } from "react-icons/fi";
+import React from 'react';
+import { FiChevronLeft, FiChevronRight } from 'react-icons/fi';
 
 interface PaginationProps {
   currentPage: number;
@@ -47,7 +47,7 @@ const Pagination: React.FC<PaginationProps> = ({
 
       // Add ellipsis if needed
       if (startPage > 2) {
-        pageNumbers.push("ellipsis1");
+        pageNumbers.push('ellipsis1');
       }
 
       // Add middle pages
@@ -57,7 +57,7 @@ const Pagination: React.FC<PaginationProps> = ({
 
       // Add ellipsis if needed
       if (endPage < lastPage - 1) {
-        pageNumbers.push("ellipsis2");
+        pageNumbers.push('ellipsis2');
       }
 
       // Add last page
@@ -79,8 +79,8 @@ const Pagination: React.FC<PaginationProps> = ({
           disabled={currentPage === 1}
           className={`relative inline-flex items-center rounded-md px-4 py-2 text-sm font-medium ${
             currentPage === 1
-              ? "bg-gray-100 text-gray-400 dark:bg-gray-700 dark:text-gray-500"
-              : "bg-white text-gray-700 hover:bg-gray-50 dark:bg-gray-800 dark:text-gray-200 dark:hover:bg-gray-700"
+              ? 'bg-gray-100 text-gray-400 dark:bg-gray-700 dark:text-gray-500'
+              : 'bg-white text-gray-700 hover:bg-gray-50 dark:bg-gray-800 dark:text-gray-200 dark:hover:bg-gray-700'
           }`}
         >
           Previous
@@ -90,8 +90,8 @@ const Pagination: React.FC<PaginationProps> = ({
           disabled={currentPage === totalPages}
           className={`relative ml-3 inline-flex items-center rounded-md px-4 py-2 text-sm font-medium ${
             currentPage === totalPages
-              ? "bg-gray-100 text-gray-400 dark:bg-gray-700 dark:text-gray-500"
-              : "bg-white text-gray-700 hover:bg-gray-50 dark:bg-gray-800 dark:text-gray-200 dark:hover:bg-gray-700"
+              ? 'bg-gray-100 text-gray-400 dark:bg-gray-700 dark:text-gray-500'
+              : 'bg-white text-gray-700 hover:bg-gray-50 dark:bg-gray-800 dark:text-gray-200 dark:hover:bg-gray-700'
           }`}
         >
           Next
@@ -101,14 +101,14 @@ const Pagination: React.FC<PaginationProps> = ({
         <div>
           {totalItems !== undefined && itemsPerPage !== undefined && (
             <p className="text-sm text-gray-700 dark:text-gray-300">
-              Showing{" "}
+              Showing{' '}
               <span className="font-medium">
                 {Math.min((currentPage - 1) * itemsPerPage + 1, totalItems)}
-              </span>{" "}
-              to{" "}
+              </span>{' '}
+              to{' '}
               <span className="font-medium">
                 {Math.min(currentPage * itemsPerPage, totalItems)}
-              </span>{" "}
+              </span>{' '}
               of <span className="font-medium">{totalItems}</span> results
             </p>
           )}
@@ -123,15 +123,15 @@ const Pagination: React.FC<PaginationProps> = ({
               disabled={currentPage === 1}
               className={`relative inline-flex items-center rounded-l-md px-2 py-2 text-gray-400 ${
                 currentPage === 1
-                  ? "bg-gray-100 dark:bg-gray-700"
-                  : "bg-white hover:bg-gray-50 dark:bg-gray-800 dark:hover:bg-gray-700"
+                  ? 'bg-gray-100 dark:bg-gray-700'
+                  : 'bg-white hover:bg-gray-50 dark:bg-gray-800 dark:hover:bg-gray-700'
               }`}
             >
               <span className="sr-only">Previous</span>
               <FiChevronLeft className="h-5 w-5" />
             </button>
             {getPageNumbers().map((page, index) => {
-              if (page === "ellipsis1" || page === "ellipsis2") {
+              if (page === 'ellipsis1' || page === 'ellipsis2') {
                 return (
                   <span
                     key={`${page}-${index}`}
@@ -145,11 +145,11 @@ const Pagination: React.FC<PaginationProps> = ({
                 <button
                   key={page}
                   onClick={() => onPageChange(Number(page))}
-                  aria-current={currentPage === page ? "page" : undefined}
+                  aria-current={currentPage === page ? 'page' : undefined}
                   className={`relative inline-flex items-center px-4 py-2 text-sm font-medium ${
                     currentPage === page
-                      ? "z-10 bg-blue-600 text-white"
-                      : "bg-white text-gray-500 hover:bg-gray-50 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700"
+                      ? 'z-10 bg-blue-600 text-white'
+                      : 'bg-white text-gray-500 hover:bg-gray-50 dark:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700'
                   }`}
                 >
                   {page}
@@ -161,8 +161,8 @@ const Pagination: React.FC<PaginationProps> = ({
               disabled={currentPage === totalPages}
               className={`relative inline-flex items-center rounded-r-md px-2 py-2 text-gray-400 ${
                 currentPage === totalPages
-                  ? "bg-gray-100 dark:bg-gray-700"
-                  : "bg-white hover:bg-gray-50 dark:bg-gray-800 dark:hover:bg-gray-700"
+                  ? 'bg-gray-100 dark:bg-gray-700'
+                  : 'bg-white hover:bg-gray-50 dark:bg-gray-800 dark:hover:bg-gray-700'
               }`}
             >
               <span className="sr-only">Next</span>

@@ -1,8 +1,8 @@
-import { useState, useEffect } from "react";
-import { useForm } from "react-hook-form";
-import clientService, { Client } from "../../services/clientService";
-import { ProjectStatus } from "../../services/projectService";
-import { DatePickerField } from "../common";
+import { useState, useEffect } from 'react';
+import { useForm } from 'react-hook-form';
+import clientService, { Client } from '../../services/clientService';
+import { ProjectStatus } from '../../services/projectService';
+import { DatePickerField } from '../common';
 
 interface ProjectFormProps {
   onSubmit: (data: ProjectFormData) => void;
@@ -46,7 +46,7 @@ const ProjectForm = ({
         const response = await clientService.getAll();
         setClients(response.clients);
       } catch (error) {
-        console.error("Error fetching clients:", error);
+        console.error('Error fetching clients:', error);
       } finally {
         setIsLoadingClients(false);
       }
@@ -73,8 +73,8 @@ const ProjectForm = ({
               type="text"
               className="input"
               placeholder="Enter project title"
-              {...register("title", {
-                required: "Project title is required",
+              {...register('title', {
+                required: 'Project title is required',
               })}
             />
           </div>
@@ -91,7 +91,7 @@ const ProjectForm = ({
               id="clientId"
               className="input"
               disabled={isLoadingClients}
-              {...register("clientId", { required: "Client is required" })}
+              {...register('clientId', { required: 'Client is required' })}
             >
               <option value="">Select a client</option>
               {clients.map((client) => (
@@ -101,9 +101,7 @@ const ProjectForm = ({
               ))}
             </select>
           </div>
-          {errors.clientId && (
-            <p className="error">{errors.clientId.message}</p>
-          )}
+          {errors.clientId && <p className="error">{errors.clientId.message}</p>}
         </div>
 
         {/* Status */}
@@ -115,7 +113,7 @@ const ProjectForm = ({
             <select
               id="status"
               className="input"
-              {...register("status", { required: "Status is required" })}
+              {...register('status', { required: 'Status is required' })}
             >
               <option value={ProjectStatus.NOT_STARTED}>Not Started</option>
               <option value={ProjectStatus.IN_PROGRESS}>In Progress</option>
@@ -140,11 +138,11 @@ const ProjectForm = ({
               min="0"
               className="input"
               placeholder="Enter budget amount"
-              {...register("budget", {
+              {...register('budget', {
                 valueAsNumber: true,
                 min: {
                   value: 0,
-                  message: "Budget must be a positive number",
+                  message: 'Budget must be a positive number',
                 },
               })}
             />
@@ -174,12 +172,10 @@ const ProjectForm = ({
               rows={4}
               className="input"
               placeholder="Enter project description"
-              {...register("description")}
+              {...register('description')}
             ></textarea>
           </div>
-          {errors.description && (
-            <p className="error">{errors.description.message}</p>
-          )}
+          {errors.description && <p className="error">{errors.description.message}</p>}
         </div>
       </div>
 
@@ -192,16 +188,8 @@ const ProjectForm = ({
         >
           Cancel
         </button>
-        <button
-          type="submit"
-          className="btn btn-primary"
-          disabled={isSubmitting}
-        >
-          {isSubmitting
-            ? "Saving..."
-            : initialData.title
-            ? "Update Project"
-            : "Create Project"}
+        <button type="submit" className="btn btn-primary" disabled={isSubmitting}>
+          {isSubmitting ? 'Saving...' : initialData.title ? 'Update Project' : 'Create Project'}
         </button>
       </div>
     </form>

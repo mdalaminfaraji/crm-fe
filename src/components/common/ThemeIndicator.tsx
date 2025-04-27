@@ -16,7 +16,7 @@ const ThemeIndicator: React.FC = () => {
       const timer = setTimeout(() => {
         setShowIndicator(false);
       }, 5000);
-      
+
       return () => clearTimeout(timer);
     }
   }, [mounted]);
@@ -24,7 +24,7 @@ const ThemeIndicator: React.FC = () => {
   if (!mounted) return null;
 
   return (
-    <div 
+    <div
       className={`fixed bottom-4 right-4 transition-all duration-500 ease-in-out transform ${
         showIndicator ? 'translate-y-0 opacity-100' : 'translate-y-20 opacity-0'
       }`}
@@ -40,7 +40,7 @@ const ThemeIndicator: React.FC = () => {
             <FiMoon className="w-4 h-4 text-blue-400" />
           )}
         </div>
-        <button 
+        <button
           onClick={() => {
             toggleTheme();
             setShowIndicator(true);

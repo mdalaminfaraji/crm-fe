@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { createContext, useState, useEffect, ReactNode } from 'react';
 
 // Define the user type
 interface User {
@@ -35,7 +35,7 @@ export const AuthContext = createContext<AuthContextType>({
   login: async () => {},
   register: async () => {},
   logout: async () => {},
-  error: null
+  error: null,
 });
 
 // Auth provider props
@@ -54,10 +54,10 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     const checkAuth = async () => {
       try {
         setIsLoading(true);
-        
+
         // Check if user is already authenticated in localStorage
         const isAuth = localStorage.getItem('isAuthenticated') === 'true';
-        
+
         if (isAuth) {
           // In a real app, you would validate the token with the backend
           // const response = await fetch('http://localhost:5000/api/auth/profile', {
@@ -66,7 +66,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
           //   },
           //   credentials: 'include'
           // });
-          
+
           // if (response.ok) {
           //   const userData = await response.json();
           //   setUser(userData.user);
@@ -82,7 +82,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
             id: '1',
             email: 'demo@example.com',
             firstName: 'Demo',
-            lastName: 'User'
+            lastName: 'User',
           });
         }
       } catch (err) {
@@ -103,7 +103,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     try {
       setIsLoading(true);
       setError(null);
-      
+
       // In a real app, you would call your API
       // const response = await fetch('http://localhost:5000/api/auth/login', {
       //   method: 'POST',
@@ -113,30 +113,30 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       //   body: JSON.stringify({ email, password }),
       //   credentials: 'include'
       // });
-      
+
       // if (!response.ok) {
       //   const errorData = await response.json();
       //   throw new Error(errorData.message || 'Login failed');
       // }
-      
+
       // const data = await response.json();
       // localStorage.setItem('token', data.token);
-      
+
       // For demo purposes, simulate successful login
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+
       if (email !== 'demo@example.com' || password !== 'password') {
         throw new Error('Invalid credentials');
       }
-      
+
       // Set mock user data
       const userData = {
         id: '1',
         email: 'demo@example.com',
         firstName: 'Demo',
-        lastName: 'User'
+        lastName: 'User',
       };
-      
+
       setUser(userData);
       localStorage.setItem('isAuthenticated', 'true');
       localStorage.setItem('token', 'mock-jwt-token');
@@ -153,7 +153,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     try {
       setIsLoading(true);
       setError(null);
-      
+
       // In a real app, you would call your API
       // const response = await fetch('http://localhost:5000/api/auth/register', {
       //   method: 'POST',
@@ -162,15 +162,15 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       //   },
       //   body: JSON.stringify(userData)
       // });
-      
+
       // if (!response.ok) {
       //   const errorData = await response.json();
       //   throw new Error(errorData.message || 'Registration failed');
       // }
-      
+
       // For demo purposes, simulate successful registration
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+
       // In a real app, you would typically redirect to login after registration
       // Here we'll just simulate a successful registration
       console.log('Registration successful:', userData);
@@ -186,16 +186,16 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   const logout = async () => {
     try {
       setIsLoading(true);
-      
+
       // In a real app, you would call your API
       // await fetch('http://localhost:5000/api/auth/logout', {
       //   method: 'POST',
       //   credentials: 'include'
       // });
-      
+
       // For demo purposes, simulate logout delay
-      await new Promise(resolve => setTimeout(resolve, 500));
-      
+      await new Promise((resolve) => setTimeout(resolve, 500));
+
       // Clear auth data
       localStorage.removeItem('token');
       localStorage.removeItem('isAuthenticated');
@@ -220,12 +220,10 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         login,
         register,
         logout,
-        error
+        error,
       }}
     >
       {children}
     </AuthContext.Provider>
   );
 };
-
-

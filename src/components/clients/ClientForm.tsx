@@ -1,4 +1,4 @@
-import { useForm } from "react-hook-form";
+import { useForm } from 'react-hook-form';
 interface ClientFormProps {
   onSubmit: (data: ClientFormData) => void;
   onCancel: () => void;
@@ -48,11 +48,11 @@ const ClientForm = ({
               type="text"
               className="input pl-10"
               placeholder="Enter client name"
-              {...register("name", {
-                required: "Client name is required",
+              {...register('name', {
+                required: 'Client name is required',
                 minLength: {
                   value: 2,
-                  message: "Name must be at least 2 characters",
+                  message: 'Name must be at least 2 characters',
                 },
               })}
             />
@@ -71,11 +71,11 @@ const ClientForm = ({
               type="email"
               className="input pl-10"
               placeholder="client@example.com"
-              {...register("email", {
-                required: "Email is required",
+              {...register('email', {
+                required: 'Email is required',
                 pattern: {
                   value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
-                  message: "Invalid email address",
+                  message: 'Invalid email address',
                 },
               })}
             />
@@ -94,11 +94,11 @@ const ClientForm = ({
               type="text"
               className="input pl-10"
               placeholder="(123) 456-7890"
-              {...register("phone", {
-                required: "Phone number is required",
+              {...register('phone', {
+                required: 'Phone number is required',
                 pattern: {
                   value: /^[0-9()\-\s+]+$/,
-                  message: "Invalid phone number format",
+                  message: 'Invalid phone number format',
                 },
               })}
             />
@@ -117,8 +117,8 @@ const ClientForm = ({
               type="text"
               className="input pl-10"
               placeholder="Enter company name"
-              {...register("company", {
-                required: "Company name is required",
+              {...register('company', {
+                required: 'Company name is required',
               })}
             />
           </div>
@@ -133,7 +133,7 @@ const ClientForm = ({
             <select
               id="status"
               className="input pl-10"
-              {...register("status", { required: "Status is required" })}
+              {...register('status', { required: 'Status is required' })}
             >
               <option value="Active">Active</option>
               <option value="Inactive">Inactive</option>
@@ -152,7 +152,7 @@ const ClientForm = ({
             type="text"
             className="input"
             placeholder="Enter client address (optional)"
-            {...register("address")}
+            {...register('address')}
           />
         </div>
 
@@ -166,7 +166,7 @@ const ClientForm = ({
             rows={4}
             className="input"
             placeholder="Enter any additional notes about this client (optional)"
-            {...register("notes")}
+            {...register('notes')}
           ></textarea>
         </div>
       </div>
@@ -180,16 +180,8 @@ const ClientForm = ({
         >
           Cancel
         </button>
-        <button
-          type="submit"
-          className="btn btn-primary"
-          disabled={isSubmitting}
-        >
-          {isSubmitting
-            ? "Saving..."
-            : initialData.name
-            ? "Update Client"
-            : "Add Client"}
+        <button type="submit" className="btn btn-primary" disabled={isSubmitting}>
+          {isSubmitting ? 'Saving...' : initialData.name ? 'Update Client' : 'Add Client'}
         </button>
       </div>
     </form>

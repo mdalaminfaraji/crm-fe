@@ -1,9 +1,9 @@
-import { useState, useEffect } from "react";
-import { Link, useNavigate, useLocation } from "react-router-dom";
-import { useAuth } from "../../hooks/useAuth";
-import { useForm } from "react-hook-form";
-import { FiEye, FiEyeOff } from "react-icons/fi";
-import Swal from "sweetalert2";
+import { useState, useEffect } from 'react';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { useAuth } from '../../hooks/useAuth';
+import { useForm } from 'react-hook-form';
+import { FiEye, FiEyeOff } from 'react-icons/fi';
+import Swal from 'sweetalert2';
 
 interface LoginFormData {
   email: string;
@@ -25,7 +25,7 @@ const Login = () => {
         message?: string;
       }
       const state = location.state as LocationState;
-      const from = state?.from?.pathname || "/dashboard";
+      const from = state?.from?.pathname || '/dashboard';
       navigate(from, { replace: true });
     }
   }, [isAuthenticated, navigate, location]);
@@ -42,24 +42,21 @@ const Login = () => {
       await login(data.email, data.password);
 
       Swal.fire({
-        icon: "success",
-        title: "Login successful!",
+        icon: 'success',
+        title: 'Login successful!',
         showConfirmButton: false,
         timer: 2000,
       });
       // Navigation is handled in the useEffect above
     } catch (error) {
       Swal.fire({
-        icon: "error",
-        title: "Login failed!",
-        text:
-          error instanceof Error
-            ? error.message
-            : "An error occurred during login",
+        icon: 'error',
+        title: 'Login failed!',
+        text: error instanceof Error ? error.message : 'An error occurred during login',
         showConfirmButton: false,
         timer: 2000,
       });
-      console.error("Login submission error:", error);
+      console.error('Login submission error:', error);
     }
   };
 
@@ -67,9 +64,7 @@ const Login = () => {
     <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-900 px-4">
       <div className="max-w-md w-full space-y-8 card">
         <div className="text-center">
-          <h1 className="text-3xl font-extrabold text-gray-900 dark:text-white">
-            Welcome back
-          </h1>
+          <h1 className="text-3xl font-extrabold text-gray-900 dark:text-white">Welcome back</h1>
           <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
             Sign in to your account to continue
           </p>
@@ -94,19 +89,17 @@ const Login = () => {
                   autoComplete="email"
                   className="input pl-10"
                   placeholder="Enter your email address"
-                  {...register("email", {
-                    required: "Email is required",
+                  {...register('email', {
+                    required: 'Email is required',
                     pattern: {
                       value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
-                      message: "Invalid email address",
+                      message: 'Invalid email address',
                     },
                   })}
                 />
               </div>
               {errors.email && (
-                <p className="text-red-500 dark:text-red-400">
-                  {errors.email.message}
-                </p>
+                <p className="text-red-500 dark:text-red-400">{errors.email.message}</p>
               )}
             </div>
 
@@ -117,15 +110,15 @@ const Login = () => {
               <div className="relative">
                 <input
                   id="password"
-                  type={showPassword ? "text" : "password"}
+                  type={showPassword ? 'text' : 'password'}
                   autoComplete="current-password"
                   className="input pl-10 pr-10"
                   placeholder="Enter your password"
-                  {...register("password", {
-                    required: "Password is required",
+                  {...register('password', {
+                    required: 'Password is required',
                     minLength: {
                       value: 6,
-                      message: "Password must be at least 6 characters",
+                      message: 'Password must be at least 6 characters',
                     },
                   })}
                 />
@@ -142,9 +135,7 @@ const Login = () => {
                 </button>
               </div>
               {errors.password && (
-                <p className="text-red-500 dark:text-red-400">
-                  {errors.password.message}
-                </p>
+                <p className="text-red-500 dark:text-red-400">{errors.password.message}</p>
               )}
             </div>
           </div>
@@ -181,14 +172,14 @@ const Login = () => {
               className="btn btn-primary w-full flex justify-center"
               disabled={isLoading}
             >
-              {isLoading ? "Signing in..." : "Sign in"}
+              {isLoading ? 'Signing in...' : 'Sign in'}
             </button>
           </div>
         </form>
 
         <div className="text-center text-sm">
           <p className="text-gray-600 dark:text-gray-400">
-            Don't have an account?{" "}
+            Don't have an account?{' '}
             <Link
               to="/register"
               className="text-blue-600 hover:text-blue-500 dark:text-blue-400 font-medium"

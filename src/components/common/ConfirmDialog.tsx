@@ -1,4 +1,4 @@
-import React from "react";
+import React from 'react';
 
 interface ConfirmDialogProps {
   isOpen: boolean;
@@ -15,11 +15,11 @@ const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
   isOpen,
   title,
   message,
-  confirmText = "Confirm",
-  cancelText = "Cancel",
+  confirmText = 'Confirm',
+  cancelText = 'Cancel',
   onConfirm,
   onCancel,
-  confirmButtonClass = "bg-red-600 hover:bg-red-700",
+  confirmButtonClass = 'bg-red-600 hover:bg-red-700',
 }) => {
   if (!isOpen) return null;
 
@@ -27,19 +27,12 @@ const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
     <div className="fixed inset-0 z-50 overflow-y-auto">
       <div className="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
         {/* Background overlay */}
-        <div
-          className="fixed inset-0 transition-opacity"
-          aria-hidden="true"
-          onClick={onCancel}
-        >
+        <div className="fixed inset-0 transition-opacity" aria-hidden="true" onClick={onCancel}>
           <div className="absolute inset-0 bg-gray-500 dark:bg-gray-900 opacity-75 z-0"></div>
         </div>
 
         {/* Center modal */}
-        <span
-          className="hidden sm:inline-block sm:align-middle sm:h-screen"
-          aria-hidden="true"
-        >
+        <span className="hidden sm:inline-block sm:align-middle sm:h-screen" aria-hidden="true">
           &#8203;
         </span>
 
@@ -78,9 +71,7 @@ const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
                   {title}
                 </h3>
                 <div className="mt-2">
-                  <p className="text-sm text-gray-500 dark:text-gray-400">
-                    {message}
-                  </p>
+                  <p className="text-sm text-gray-500 dark:text-gray-400">{message}</p>
                 </div>
               </div>
             </div>

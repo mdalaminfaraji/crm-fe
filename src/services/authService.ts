@@ -1,4 +1,4 @@
-import apiClient from "./apiClient";
+import apiClient from './apiClient';
 
 export interface LoginRequest {
   email: string;
@@ -39,24 +39,24 @@ export interface ProfileResponse {
 
 const authService = {
   login: async (data: LoginRequest): Promise<AuthResponse> => {
-    const response = await apiClient.post("/api/auth/login", data);
+    const response = await apiClient.post('/api/auth/login', data);
     return response.data;
   },
 
   register: async (data: RegisterRequest): Promise<AuthResponse> => {
-    const response = await apiClient.post("/api/auth/register", data);
+    const response = await apiClient.post('/api/auth/register', data);
     return response.data;
   },
 
   logout: async (): Promise<{ message: string }> => {
-    const response = await apiClient.post("/api/auth/logout");
-    localStorage.removeItem("token");
-    localStorage.removeItem("isAuthenticated");
+    const response = await apiClient.post('/api/auth/logout');
+    localStorage.removeItem('token');
+    localStorage.removeItem('isAuthenticated');
     return response.data;
   },
 
   getProfile: async (): Promise<ProfileResponse> => {
-    const response = await apiClient.get("/api/auth/profile");
+    const response = await apiClient.get('/api/auth/profile');
     return response.data;
   },
 };

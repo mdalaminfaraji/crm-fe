@@ -1,39 +1,33 @@
-import { ReactNode, useEffect } from "react";
-import { FiX } from "react-icons/fi";
+import { ReactNode, useEffect } from 'react';
+import { FiX } from 'react-icons/fi';
 
 interface ModalProps {
   isOpen: boolean;
   onClose: () => void;
   title: string;
   children: ReactNode;
-  size?: "sm" | "md" | "lg" | "xl";
+  size?: 'sm' | 'md' | 'lg' | 'xl';
 }
 
-const Modal = ({
-  isOpen,
-  onClose,
-  title,
-  children,
-  size = "md",
-}: ModalProps) => {
+const Modal = ({ isOpen, onClose, title, children, size = 'md' }: ModalProps) => {
   // Close modal when Escape key is pressed
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
-      if (e.key === "Escape" && isOpen) {
+      if (e.key === 'Escape' && isOpen) {
         onClose();
       }
     };
 
-    window.addEventListener("keydown", handleEscape);
+    window.addEventListener('keydown', handleEscape);
 
     // Prevent scrolling when modal is open
     if (isOpen) {
-      document.body.style.overflow = "hidden";
+      document.body.style.overflow = 'hidden';
     }
 
     return () => {
-      window.removeEventListener("keydown", handleEscape);
-      document.body.style.overflow = "auto";
+      window.removeEventListener('keydown', handleEscape);
+      document.body.style.overflow = 'auto';
     };
   }, [isOpen, onClose]);
 
@@ -43,16 +37,16 @@ const Modal = ({
   // Determine modal width based on size prop
   const getModalWidth = () => {
     switch (size) {
-      case "sm":
-        return "max-w-md";
-      case "md":
-        return "max-w-lg";
-      case "lg":
-        return "max-w-2xl";
-      case "xl":
-        return "max-w-4xl";
+      case 'sm':
+        return 'max-w-md';
+      case 'md':
+        return 'max-w-lg';
+      case 'lg':
+        return 'max-w-2xl';
+      case 'xl':
+        return 'max-w-4xl';
       default:
-        return "max-w-lg";
+        return 'max-w-lg';
     }
   };
 
@@ -73,9 +67,7 @@ const Modal = ({
         >
           {/* Header */}
           <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center">
-            <h3 className="text-lg font-medium text-gray-900 dark:text-white">
-              {title}
-            </h3>
+            <h3 className="text-lg font-medium text-gray-900 dark:text-white">{title}</h3>
             <button
               type="button"
               className="text-gray-400 hover:text-gray-500 focus:outline-none"

@@ -1,10 +1,4 @@
-import {
-  Controller,
-  Control,
-  FieldValues,
-  Path,
-  FieldError,
-} from "react-hook-form";
+import { Controller, Control, FieldValues, Path, FieldError } from 'react-hook-form';
 
 interface SelectOption {
   value: string;
@@ -30,13 +24,13 @@ const SelectField = <T extends FieldValues>({
   control,
   label,
   options,
-  placeholder = "Select an option",
+  placeholder = 'Select an option',
   error,
   isRequired = false,
   isLoading = false,
-  loadingText = "Loading...",
+  loadingText = 'Loading...',
   disabled = false,
-  className = "",
+  className = '',
 }: SelectFieldProps<T>) => {
   return (
     <div className={className}>
@@ -55,13 +49,13 @@ const SelectField = <T extends FieldValues>({
               <select
                 id={name}
                 ref={ref}
-                value={value || ""}
+                value={value || ''}
                 onChange={onChange}
                 disabled={disabled || isLoading}
                 className={`mt-1 p-2 block w-full rounded-md shadow-sm text-white focus:border-blue-500 focus:ring-blue-500 dark:bg-[#374151] dark:text-white appearance-none ${
                   error
-                    ? "border-red-500 focus:border-red-500 focus:ring-red-500"
-                    : "border-gray-300 dark:border-gray-600"
+                    ? 'border-red-500 focus:border-red-500 focus:ring-red-500'
+                    : 'border-gray-300 dark:border-gray-600'
                 }`}
                 {...rest}
               >
@@ -91,9 +85,7 @@ const SelectField = <T extends FieldValues>({
           )}
         />
         {error && <p className="mt-1 text-sm text-red-500">{error.message}</p>}
-        {!error && isLoading && (
-          <p className="mt-1 text-sm text-gray-500">{loadingText}</p>
-        )}
+        {!error && isLoading && <p className="mt-1 text-sm text-gray-500">{loadingText}</p>}
       </div>
     </div>
   );

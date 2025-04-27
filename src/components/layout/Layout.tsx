@@ -54,11 +54,9 @@ const Layout = ({ children }: LayoutProps) => {
       {/* Main Content */}
       <div className="flex flex-col flex-1 overflow-hidden w-full">
         <Navbar toggleSidebar={toggleSidebar} isMobile={isMobile} />
-        
+
         <main className="flex-1 overflow-y-auto p-4 md:p-6">
-          <div className="container mx-auto">
-            {children}
-          </div>
+          <div className="container mx-auto">{children}</div>
         </main>
       </div>
     </div>

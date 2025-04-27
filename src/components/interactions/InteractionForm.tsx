@@ -1,13 +1,9 @@
-import { useState, useEffect } from "react";
-import { useForm } from "react-hook-form";
-import { InteractionType } from "../../services/interactionService";
-import clientService, { Client } from "../../services/clientService";
-import projectService, { Project } from "../../services/projectService";
-import {
-  SelectField,
-  TextareaField,
-  DatePickerField,
-} from "../common";
+import { useState, useEffect } from 'react';
+import { useForm } from 'react-hook-form';
+import { InteractionType } from '../../services/interactionService';
+import clientService, { Client } from '../../services/clientService';
+import projectService, { Project } from '../../services/projectService';
+import { SelectField, TextareaField, DatePickerField } from '../common';
 
 export interface InteractionFormData {
   date: Date | string;
@@ -40,7 +36,7 @@ const InteractionForm = ({
       date: initialData.date ? new Date(initialData.date as string) : new Date(),
       type: initialData.type || InteractionType.MEETING,
     },
-    mode: "onSubmit",
+    mode: 'onSubmit',
   });
 
   const [clients, setClients] = useState<Client[]>([]);
@@ -56,7 +52,7 @@ const InteractionForm = ({
         const response = await clientService.getAll();
         setClients(response.clients);
       } catch (error) {
-        console.error("Error fetching clients:", error);
+        console.error('Error fetching clients:', error);
       } finally {
         setIsLoadingClients(false);
       }
@@ -68,7 +64,7 @@ const InteractionForm = ({
         const response = await projectService.getAll();
         setProjects(response.projects);
       } catch (error) {
-        console.error("Error fetching projects:", error);
+        console.error('Error fetching projects:', error);
       } finally {
         setIsLoadingProjects(false);
       }
@@ -81,16 +77,14 @@ const InteractionForm = ({
   const onFormSubmit = (data: InteractionFormData) => {
     const formattedData = {
       ...data,
-      date: data.date instanceof Date
-        ? data.date.toISOString().split("T")[0]
-        : String(data.date),
+      date: data.date instanceof Date ? data.date.toISOString().split('T')[0] : String(data.date),
     };
-    
+
     onSubmit(formattedData);
   };
-  
+
   const onError = (errors: Record<string, unknown>) => {
-    console.error("Form validation errors:", errors);
+    console.error('Form validation errors:', errors);
   };
 
   return (
@@ -180,12 +174,8 @@ const InteractionForm = ({
         >
           Cancel
         </button>
-        <button
-          type="submit"
-          disabled={isSubmitting}
-          className="btn btn-primary"
-        >
-          {isSubmitting ? "Saving..." : "Save"}
+        <button type="submit" disabled={isSubmitting} className="btn btn-primary">
+          {isSubmitting ? 'Saving...' : 'Save'}
         </button>
       </div>
     </form>
