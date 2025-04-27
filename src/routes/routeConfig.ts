@@ -5,6 +5,7 @@ import { lazy } from "react";
 const Dashboard = lazy(() => import("../pages/Dashboard"));
 const Clients = lazy(() => import("../pages/Clients"));
 const Projects = lazy(() => import("../pages/Projects"));
+const Interactions = lazy(() => import("../pages/Interactions"));
 const Login = lazy(() => import("../pages/auth/Login"));
 const Register = lazy(() => import("../pages/auth/Register"));
 const ComingSoon = lazy(() => import("../components/common/ComingSoon"));
@@ -75,7 +76,7 @@ export const privateRoutes: RouteConfig[] = [
   },
   {
     path: "/interactions",
-    component: ComingSoon,
+    component: Interactions,
     type: RouteType.PRIVATE,
     exact: true,
     title: "Interactions",
