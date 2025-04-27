@@ -1,11 +1,18 @@
 import { useState, useEffect } from "react";
+import { useForm } from "react-hook-form";
 import clientService, { Client } from "../../services/clientService";
 import projectService, { Project } from "../../services/projectService";
+import {
+  InputField,
+  TextareaField,
+  SelectField,
+  DatePickerField,
+} from "../common";
 
 export interface ReminderFormData {
   title: string;
   description?: string;
-  dueDate: string;
+  dueDate: Date | string;
   completed?: boolean;
   clientId?: string;
   projectId?: string;
@@ -24,13 +31,20 @@ const ReminderForm = ({
   initialData = {},
   isSubmitting = false,
 }: ReminderFormProps) => {
-  const [formData, setFormData] = useState<ReminderFormData>({
-    title: initialData.title || "",
-    description: initialData.description || "",
-    dueDate: initialData.dueDate || new Date().toISOString().split("T")[0],
-    completed: initialData.completed || false,
-    clientId: initialData.clientId || "",
-    projectId: initialData.projectId || "",
+  const {
+    control,
+    handleSubmit,
+    register,
+    formState: { errors },
+  } = useForm<ReminderFormData>({
+    defaultValues: {
+      ...initialData,
+      dueDate: initialData.dueDate
+        ? new Date(initialData.dueDate as string)
+        : new Date(),
+      completed: initialData.completed || false,
+    },
+    mode: "onSubmit",
   });
 
   const [clients, setClients] = useState<Client[]>([]);
@@ -68,168 +82,125 @@ const ReminderForm = ({
     fetchProjects();
   }, []);
 
-  const handleChange = (
-    e: React.ChangeEvent<
-      HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
-    >
-  ) => {
-    const { name, value, type } = e.target;
-    
-    if (type === 'checkbox') {
-      const target = e.target as HTMLInputElement;
-      setFormData((prev) => ({
-        ...prev,
-        [name]: target.checked,
-      }));
-    } else {
-      setFormData((prev) => ({
-        ...prev,
-        [name]: value,
-      }));
-    }
+  const onFormSubmit = (data: ReminderFormData) => {
+    const formattedData = {
+      ...data,
+      dueDate:
+        data.dueDate instanceof Date
+          ? data.dueDate.toISOString().split("T")[0]
+          : String(data.dueDate),
+    };
+
+    onSubmit(formattedData);
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    onSubmit(formData);
+  const onError = (errors: Record<string, unknown>) => {
+    console.error("Form validation errors:", errors);
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
-      <div>
-        <label
-          htmlFor="title"
-          className="block text-sm font-medium text-gray-700 dark:text-gray-300"
-        >
-          Title
-        </label>
-        <input
-          type="text"
-          id="title"
-          name="title"
-          value={formData.title}
-          onChange={handleChange}
-          className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-800 dark:text-white"
-          required
-        />
+    <form onSubmit={handleSubmit(onFormSubmit, onError)} className="space-y-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {/* Title */}
+        <div className="md:col-span-2">
+          <InputField
+            name="title"
+            control={control}
+            label="Title"
+            placeholder="Enter reminder title"
+            error={errors.title}
+            isRequired={true}
+          />
+        </div>
+
+        {/* Due Date */}
+        <div>
+          <DatePickerField
+            name="dueDate"
+            control={control}
+            label="Due Date"
+            error={errors.dueDate}
+            isRequired={true}
+            placeholderText="Select due date"
+          />
+        </div>
+
+        {/* Client */}
+        <div>
+          <SelectField
+            name="clientId"
+            control={control}
+            label="Client"
+            options={clients.map((client) => ({
+              value: client.id,
+              label: client.name,
+            }))}
+            placeholder="Select a client"
+            error={errors.clientId}
+            isLoading={isLoadingClients}
+            loadingText="Loading clients..."
+          />
+        </div>
+
+        {/* Project */}
+        <div>
+          <SelectField
+            name="projectId"
+            control={control}
+            label="Project"
+            options={projects.map((project) => ({
+              value: project.id,
+              label: project.title,
+            }))}
+            placeholder="Select a project"
+            error={errors.projectId}
+            isLoading={isLoadingProjects}
+            loadingText="Loading projects..."
+          />
+        </div>
+
+        {/* Completed */}
+        <div className="flex items-center">
+          <input
+            type="checkbox"
+            id="completed"
+            className="h-4 w-4 rounded border-gray-300 dark:border-gray-600 text-blue-600 focus:ring-blue-500"
+            {...register("completed")}
+          />
+          <label
+            htmlFor="completed"
+            className="ml-2 block text-sm font-medium text-gray-700 dark:text-gray-300"
+          >
+            Mark as completed
+          </label>
+        </div>
+
+        {/* Description */}
+        <div className="md:col-span-2">
+          <TextareaField
+            name="description"
+            control={control}
+            label="Description"
+            placeholder="Enter reminder details"
+            error={errors.description}
+            rows={4}
+          />
+        </div>
       </div>
 
-      <div>
-        <label
-          htmlFor="description"
-          className="block text-sm font-medium text-gray-700 dark:text-gray-300"
-        >
-          Description
-        </label>
-        <textarea
-          id="description"
-          name="description"
-          rows={3}
-          value={formData.description}
-          onChange={handleChange}
-          className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-800 dark:text-white"
-        />
-      </div>
-
-      <div>
-        <label
-          htmlFor="dueDate"
-          className="block text-sm font-medium text-gray-700 dark:text-gray-300"
-        >
-          Due Date
-        </label>
-        <input
-          type="date"
-          id="dueDate"
-          name="dueDate"
-          value={formData.dueDate}
-          onChange={handleChange}
-          className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-800 dark:text-white"
-          required
-        />
-      </div>
-
-      <div className="flex items-center">
-        <input
-          type="checkbox"
-          id="completed"
-          name="completed"
-          checked={formData.completed}
-          onChange={handleChange}
-          className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
-        />
-        <label
-          htmlFor="completed"
-          className="ml-2 block text-sm font-medium text-gray-700 dark:text-gray-300"
-        >
-          Completed
-        </label>
-      </div>
-
-      <div>
-        <label
-          htmlFor="clientId"
-          className="block text-sm font-medium text-gray-700 dark:text-gray-300"
-        >
-          Client
-        </label>
-        <select
-          id="clientId"
-          name="clientId"
-          value={formData.clientId}
-          onChange={handleChange}
-          className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-800 dark:text-white"
-        >
-          <option value="">Select a client (optional)</option>
-          {clients.map((client) => (
-            <option key={client.id} value={client.id}>
-              {client.name}
-            </option>
-          ))}
-        </select>
-        {isLoadingClients && (
-          <p className="text-sm text-gray-500">Loading clients...</p>
-        )}
-      </div>
-
-      <div>
-        <label
-          htmlFor="projectId"
-          className="block text-sm font-medium text-gray-700 dark:text-gray-300"
-        >
-          Project
-        </label>
-        <select
-          id="projectId"
-          name="projectId"
-          value={formData.projectId}
-          onChange={handleChange}
-          className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-800 dark:text-white"
-        >
-          <option value="">Select a project (optional)</option>
-          {projects.map((project) => (
-            <option key={project.id} value={project.id}>
-              {project.title}
-            </option>
-          ))}
-        </select>
-        {isLoadingProjects && (
-          <p className="text-sm text-gray-500">Loading projects...</p>
-        )}
-      </div>
-
-      <div className="flex justify-end space-x-3 pt-4">
+      <div className="flex justify-end space-x-4 pt-4 border-t border-gray-200 dark:border-gray-700 mt-6">
         <button
           type="button"
           onClick={onCancel}
-          className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+          className="btn btn-secondary"
+          disabled={isSubmitting}
         >
           Cancel
         </button>
         <button
           type="submit"
           disabled={isSubmitting}
-          className="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+          className="btn btn-primary"
         >
           {isSubmitting ? "Saving..." : "Save"}
         </button>

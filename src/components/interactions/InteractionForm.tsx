@@ -1,10 +1,16 @@
 import { useState, useEffect } from "react";
+import { useForm } from "react-hook-form";
 import { InteractionType } from "../../services/interactionService";
 import clientService, { Client } from "../../services/clientService";
 import projectService, { Project } from "../../services/projectService";
+import {
+  SelectField,
+  TextareaField,
+  DatePickerField,
+} from "../common";
 
 export interface InteractionFormData {
-  date?: string;
+  date: Date | string;
   type: InteractionType;
   notes?: string;
   clientId?: string;
@@ -24,12 +30,17 @@ const InteractionForm = ({
   initialData = {},
   isSubmitting = false,
 }: InteractionFormProps) => {
-  const [formData, setFormData] = useState<InteractionFormData>({
-    date: initialData.date || new Date().toISOString().split("T")[0],
-    type: initialData.type || InteractionType.MEETING,
-    notes: initialData.notes || "",
-    clientId: initialData.clientId || "",
-    projectId: initialData.projectId || "",
+  const {
+    control,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<InteractionFormData>({
+    defaultValues: {
+      ...initialData,
+      date: initialData.date ? new Date(initialData.date as string) : new Date(),
+      type: initialData.type || InteractionType.MEETING,
+    },
+    mode: "onSubmit",
   });
 
   const [clients, setClients] = useState<Client[]>([]);
@@ -67,147 +78,112 @@ const InteractionForm = ({
     fetchProjects();
   }, []);
 
-  const handleChange = (
-    e: React.ChangeEvent<
-      HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
-    >
-  ) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
+  const onFormSubmit = (data: InteractionFormData) => {
+    const formattedData = {
+      ...data,
+      date: data.date instanceof Date
+        ? data.date.toISOString().split("T")[0]
+        : String(data.date),
+    };
+    
+    onSubmit(formattedData);
   };
-
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    onSubmit(formData);
+  
+  const onError = (errors: Record<string, unknown>) => {
+    console.error("Form validation errors:", errors);
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
-      <div>
-        <label
-          htmlFor="date"
-          className="block text-sm font-medium text-gray-700 dark:text-gray-300"
-        >
-          Date
-        </label>
-        <input
-          type="date"
-          id="date"
-          name="date"
-          value={formData.date}
-          onChange={handleChange}
-          className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-800 dark:text-white"
-          required
-        />
+    <form onSubmit={handleSubmit(onFormSubmit, onError)} className="space-y-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {/* Date */}
+        <div>
+          <DatePickerField
+            name="date"
+            control={control}
+            label="Date"
+            error={errors.date}
+            isRequired={true}
+            placeholderText="Select interaction date"
+          />
+        </div>
+
+        {/* Type */}
+        <div>
+          <SelectField
+            name="type"
+            control={control}
+            label="Type"
+            options={Object.values(InteractionType).map((type) => ({
+              value: type,
+              label: type,
+            }))}
+            placeholder="Select interaction type"
+            error={errors.type}
+            isRequired={true}
+          />
+        </div>
+
+        {/* Client */}
+        <div>
+          <SelectField
+            name="clientId"
+            control={control}
+            label="Client"
+            options={clients.map((client) => ({
+              value: client.id,
+              label: client.name,
+            }))}
+            placeholder="Select a client"
+            error={errors.clientId}
+            isLoading={isLoadingClients}
+            loadingText="Loading clients..."
+          />
+        </div>
+
+        {/* Project */}
+        <div>
+          <SelectField
+            name="projectId"
+            control={control}
+            label="Project"
+            options={projects.map((project) => ({
+              value: project.id,
+              label: project.title,
+            }))}
+            placeholder="Select a project"
+            error={errors.projectId}
+            isLoading={isLoadingProjects}
+            loadingText="Loading projects..."
+          />
+        </div>
+
+        {/* Notes */}
+        <div className="md:col-span-2">
+          <TextareaField
+            name="notes"
+            control={control}
+            label="Notes"
+            placeholder="Enter details about the interaction"
+            error={errors.notes}
+            rows={4}
+          />
+        </div>
       </div>
 
-      <div>
-        <label
-          htmlFor="type"
-          className="block text-sm font-medium text-gray-700 dark:text-gray-300"
-        >
-          Type
-        </label>
-        <select
-          id="type"
-          name="type"
-          value={formData.type}
-          onChange={handleChange}
-          className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-800 dark:text-white"
-          required
-        >
-          {Object.values(InteractionType).map((type) => (
-            <option key={type} value={type}>
-              {type}
-            </option>
-          ))}
-        </select>
-      </div>
-
-      <div>
-        <label
-          htmlFor="clientId"
-          className="block text-sm font-medium text-gray-700 dark:text-gray-300"
-        >
-          Client
-        </label>
-        <select
-          id="clientId"
-          name="clientId"
-          value={formData.clientId}
-          onChange={handleChange}
-          className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-800 dark:text-white"
-        >
-          <option value="">Select a client (optional)</option>
-          {clients.map((client) => (
-            <option key={client.id} value={client.id}>
-              {client.name}
-            </option>
-          ))}
-        </select>
-        {isLoadingClients && (
-          <p className="text-sm text-gray-500">Loading clients...</p>
-        )}
-      </div>
-
-      <div>
-        <label
-          htmlFor="projectId"
-          className="block text-sm font-medium text-gray-700 dark:text-gray-300"
-        >
-          Project
-        </label>
-        <select
-          id="projectId"
-          name="projectId"
-          value={formData.projectId}
-          onChange={handleChange}
-          className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-800 dark:text-white"
-        >
-          <option value="">Select a project (optional)</option>
-          {projects.map((project) => (
-            <option key={project.id} value={project.id}>
-              {project.title}
-            </option>
-          ))}
-        </select>
-        {isLoadingProjects && (
-          <p className="text-sm text-gray-500">Loading projects...</p>
-        )}
-      </div>
-
-      <div>
-        <label
-          htmlFor="notes"
-          className="block text-sm font-medium text-gray-700 dark:text-gray-300"
-        >
-          Notes
-        </label>
-        <textarea
-          id="notes"
-          name="notes"
-          rows={4}
-          value={formData.notes}
-          onChange={handleChange}
-          className="mt-1 block w-full rounded-md border-gray-300 dark:border-gray-600 shadow-sm focus:border-blue-500 focus:ring-blue-500 dark:bg-gray-800 dark:text-white"
-        />
-      </div>
-
-      <div className="flex justify-end space-x-3 pt-4">
+      <div className="flex justify-end space-x-4 pt-4 border-t border-gray-200 dark:border-gray-700 mt-6">
         <button
           type="button"
           onClick={onCancel}
-          className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md shadow-sm text-sm font-medium text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+          className="btn btn-secondary"
+          disabled={isSubmitting}
         >
           Cancel
         </button>
         <button
           type="submit"
           disabled={isSubmitting}
-          className="px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+          className="btn btn-primary"
         >
           {isSubmitting ? "Saving..." : "Save"}
         </button>
