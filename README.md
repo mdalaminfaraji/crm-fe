@@ -57,8 +57,8 @@ src/
 
 ### Prerequisites
 
-- Node.js (v16 or higher)
-- npm or yarn
+- Node.js (v16 or higher) OR Docker and Docker Compose
+- npm or yarn (for local development without Docker)
 - Backend API running (see [CRM Backend Repository](https://github.com/mdalaminfaraji/crm-be))
 
 ### Installation
@@ -90,7 +90,46 @@ src/
 
 5. Open your browser and navigate to `http://localhost:5173`
 
-### Building for Production
+### Docker Setup
+
+You can run this application using Docker and Docker Compose, which makes it easy to set up and run on any computer regardless of the local environment.
+
+#### Production Build
+
+To build and run the production version of the application:
+
+```bash
+# Build and start the container in background
+docker-compose up -d crm-frontend
+
+# View logs if needed
+docker-compose logs -f crm-frontend
+```
+
+The application will be available at http://localhost:80
+
+#### Development Mode
+
+To run the application in development mode with hot reloading:
+
+```bash
+# Build and start the development container
+docker-compose up crm-frontend-dev
+```
+
+The application will be available at http://localhost:3000
+
+#### Stopping Containers
+
+```bash
+# Stop the containers
+docker-compose down
+
+# Remove volumes along with containers
+docker-compose down -v
+```
+
+### Building for Production (Without Docker)
 
 ```bash
 npm run build

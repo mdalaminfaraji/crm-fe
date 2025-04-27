@@ -1,0 +1,40 @@
+version: '3.8'
+
+services:
+  # Frontend service
+  crm-frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "80:80"
+    container_name: crm-frontend
+    environment:
+      - NODE_ENV=production
+      - VITE_API_URL=http://localhost:5000/api
+    restart: unless-stopped
+    networks:
+      - crm-network
+
+  # Development mode service (for development only)
+  crm-frontend-dev:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    ports:
+      - "3000:3000"
+    container_name: crm-frontend-dev
+    volumes:
+      - ./:/app
+      - /app/node_modules
+    environment:
+      - NODE_ENV=development
+      - VITE_API_URL=http://localhost:5000/api
+    command: npm run dev
+    restart: unless-stopped
+    networks:
+      - crm-network
+
+networks:
+  crm-network:
+    driver: bridge
