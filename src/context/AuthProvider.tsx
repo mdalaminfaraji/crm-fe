@@ -123,6 +123,19 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         password: userData.password,
       });
 
+      // Automatically log the user in after successful registration
+      // Store the JWT token in localStorage
+      localStorage.setItem("token", response.token);
+      localStorage.setItem("isAuthenticated", "true");
+
+      // Set the user data
+      setUser({
+        id: response.user.id,
+        email: response.user.email,
+        firstName: response.user.firstName || "",
+        lastName: response.user.lastName || "",
+      });
+
       // Return the response data for potential use in the component
       return response;
     } catch (error: unknown) {

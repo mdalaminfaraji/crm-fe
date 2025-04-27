@@ -40,10 +40,8 @@ const Register = () => {
 
   const onSubmit = async (data: RegisterFormData) => {
     try {
-      // Show loading toast
-
       // Call the register function from auth context
-      await registerUser({
+      const response = await registerUser({
         firstName: data.firstName,
         lastName: data.lastName,
         email: data.email,
@@ -53,19 +51,17 @@ const Register = () => {
       Swal.fire({
         icon: "success",
         title: "Registration successful!",
+        text: "You have been automatically logged in.",
         showConfirmButton: false,
         timer: 2000,
       });
 
-      // After successful registration, redirect to login
+      // After successful registration and auto-login, redirect to dashboard
       setTimeout(() => {
-        navigate("/login", {
-          state: {
-            message:
-              "Registration successful! Please log in with your new account.",
-          },
-        });
+        navigate("/dashboard");
       }, 2000);
+
+      console.log("User registered and logged in:", response);
     } catch (error) {
       Swal.fire({
         icon: "error",
