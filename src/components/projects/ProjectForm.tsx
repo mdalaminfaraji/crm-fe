@@ -1,7 +1,8 @@
-import { useEffect, useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import clientService, { Client } from "../../services/clientService";
 import { ProjectStatus } from "../../services/projectService";
+import { DatePickerField } from "../common";
 
 interface ProjectFormProps {
   onSubmit: (data: ProjectFormData) => void;
@@ -26,6 +27,7 @@ const ProjectForm = ({
   isSubmitting = false,
 }: ProjectFormProps) => {
   const {
+    control,
     register,
     handleSubmit,
     formState: { errors },
@@ -99,7 +101,9 @@ const ProjectForm = ({
               ))}
             </select>
           </div>
-          {errors.clientId && <p className="error">{errors.clientId.message}</p>}
+          {errors.clientId && (
+            <p className="error">{errors.clientId.message}</p>
+          )}
         </div>
 
         {/* Status */}
@@ -150,18 +154,13 @@ const ProjectForm = ({
 
         {/* Deadline */}
         <div>
-          <label htmlFor="deadline" className="label">
-            Deadline
-          </label>
-          <div>
-            <input
-              id="deadline"
-              type="date"
-              className="input"
-              {...register("deadline")}
-            />
-          </div>
-          {errors.deadline && <p className="error">{errors.deadline.message}</p>}
+          <DatePickerField
+            name="deadline"
+            control={control}
+            label="Deadline"
+            error={errors.deadline}
+            placeholderText="Select deadline date"
+          />
         </div>
 
         {/* Description */}

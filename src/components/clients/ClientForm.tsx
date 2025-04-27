@@ -109,7 +109,7 @@ const ClientForm = ({
         {/* Company */}
         <div>
           <label htmlFor="company" className="label">
-            Company Name <span className="text-red-500">*</span>
+            Company Name
           </label>
           <div>
             <input
@@ -122,13 +122,12 @@ const ClientForm = ({
               })}
             />
           </div>
-          {errors.company && <p className="error">{errors.company.message}</p>}
         </div>
 
         {/* Status */}
         <div>
           <label htmlFor="status" className="label">
-            Status <span className="text-red-500">*</span>
+            Status
           </label>
           <div>
             <select
