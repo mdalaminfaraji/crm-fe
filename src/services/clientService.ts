@@ -27,13 +27,43 @@ export interface ClientResponse {
   client: Client;
 }
 
+export interface PaginationData {
+  page: number;
+  limit: number;
+  totalCount: number;
+  totalPages: number;
+  hasNextPage: boolean;
+  hasPreviousPage: boolean;
+}
+
 export interface ClientsResponse {
   clients: Client[];
+  pagination: PaginationData;
+  message: string;
+}
+
+export interface ClientSearchParams {
+  page?: number;
+  limit?: number;
+  search?: string;
+  sortBy?: string;
+  sortOrder?: 'asc' | 'desc';
 }
 
 const clientService = {
-  getAll: async (): Promise<ClientsResponse> => {
-    const response = await apiClient.get("/api/clients");
+  getAll: async (params?: ClientSearchParams): Promise<ClientsResponse> => {
+    const queryParams = new URLSearchParams();
+    
+    if (params) {
+      if (params.page) queryParams.append('page', params.page.toString());
+      if (params.limit) queryParams.append('limit', params.limit.toString());
+      if (params.search) queryParams.append('search', params.search);
+      if (params.sortBy) queryParams.append('sortBy', params.sortBy);
+      if (params.sortOrder) queryParams.append('sortOrder', params.sortOrder);
+    }
+    
+    const url = `/api/clients${queryParams.toString() ? `?${queryParams.toString()}` : ''}`;
+    const response = await apiClient.get(url);
     return response.data;
   },
 

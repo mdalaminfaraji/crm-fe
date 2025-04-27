@@ -1,10 +1,12 @@
 import { useEffect, useCallback } from "react";
-import { FiPlus, FiEdit2, FiTrash2, FiSearch } from "react-icons/fi";
+import { FiPlus, FiEdit2, FiTrash2, FiSearch, FiX } from "react-icons/fi";
 import Modal from "../components/common/Modal";
 import ClientForm, { ClientFormData } from "../components/clients/ClientForm";
-import clientService, { Client as ClientType } from "../services/clientService";
+import clientService, { Client as ClientType, PaginationData, ClientSearchParams } from "../services/clientService";
 import { useImmerReducer } from "use-immer";
 import Swal from "sweetalert2";
+import Pagination from "../components/common/Pagination";
+import useDebounce from "../hooks/useDebounce";
 
 // State interface
 interface ClientsState {
@@ -15,19 +17,21 @@ interface ClientsState {
   isModalOpen: boolean;
   isSubmitting: boolean;
   currentClient: ClientType | null;
+  pagination: PaginationData;
 }
 
 // Action types
 type ClientsAction =
   | { type: "FETCH_CLIENTS_START" }
-  | { type: "FETCH_CLIENTS_SUCCESS"; payload: ClientType[] }
+  | { type: "FETCH_CLIENTS_SUCCESS"; payload: { clients: ClientType[], pagination: PaginationData } }
   | { type: "FETCH_CLIENTS_ERROR"; payload: string }
   | { type: "SET_SEARCH_TERM"; payload: string }
   | { type: "TOGGLE_MODAL"; payload?: ClientType | null }
   | { type: "SET_SUBMITTING"; payload: boolean }
   | { type: "ADD_CLIENT"; payload: ClientType }
   | { type: "UPDATE_CLIENT"; payload: ClientType }
-  | { type: "DELETE_CLIENT"; payload: string };
+  | { type: "DELETE_CLIENT"; payload: string }
+  | { type: "SET_PAGINATION"; payload: PaginationData };
 
 // Initial state
 const initialState: ClientsState = {
@@ -38,6 +42,14 @@ const initialState: ClientsState = {
   isModalOpen: false,
   isSubmitting: false,
   currentClient: null,
+  pagination: {
+    page: 1,
+    limit: 10,
+    totalCount: 0,
+    totalPages: 1,
+    hasNextPage: false,
+    hasPreviousPage: false
+  }
 };
 
 // Reducer function
@@ -48,7 +60,8 @@ const clientsReducer = (draft: ClientsState, action: ClientsAction) => {
       draft.error = null;
       break;
     case "FETCH_CLIENTS_SUCCESS":
-      draft.clients = action.payload;
+      draft.clients = action.payload.clients;
+      draft.pagination = action.payload.pagination;
       draft.isLoading = false;
       break;
     case "FETCH_CLIENTS_ERROR":
@@ -57,6 +70,13 @@ const clientsReducer = (draft: ClientsState, action: ClientsAction) => {
       break;
     case "SET_SEARCH_TERM":
       draft.searchTerm = action.payload;
+      // Reset to first page when searching
+      if (draft.pagination.page !== 1) {
+        draft.pagination.page = 1;
+      }
+      break;
+    case "SET_PAGINATION":
+      draft.pagination = action.payload;
       break;
     case "TOGGLE_MODAL":
       draft.isModalOpen = !draft.isModalOpen;
@@ -92,13 +112,32 @@ const clientsReducer = (draft: ClientsState, action: ClientsAction) => {
 const Clients = () => {
   // Use immer reducer for state management
   const [state, dispatch] = useImmerReducer(clientsReducer, initialState);
+  
+  // Debounce search term to avoid too many API calls
+  const debouncedSearchTerm = useDebounce(state.searchTerm, 500);
 
-  // Fetch clients data
+  // Fetch clients data with search and pagination
   const fetchClients = useCallback(async () => {
     try {
       dispatch({ type: "FETCH_CLIENTS_START" });
-      const response = await clientService.getAll();
-      dispatch({ type: "FETCH_CLIENTS_SUCCESS", payload: response.clients });
+      
+      const searchParams: ClientSearchParams = {
+        page: state.pagination.page,
+        limit: state.pagination.limit,
+        search: debouncedSearchTerm,
+        sortBy: "createdAt",
+        sortOrder: "desc",
+      };
+      
+      const response = await clientService.getAll(searchParams);
+      
+      dispatch({ 
+        type: "FETCH_CLIENTS_SUCCESS", 
+        payload: {
+          clients: response.clients,
+          pagination: response.pagination
+        }
+      });
     } catch (error) {
       const errorMessage =
         error instanceof Error ? error.message : "Failed to fetch clients";
@@ -111,12 +150,12 @@ const Clients = () => {
         timer: 2000,
       });
     }
-  }, [dispatch]);
+  }, [dispatch, state.pagination.page, state.pagination.limit, debouncedSearchTerm]);
 
-  // Load clients on component mount
+  // Load clients when search term or pagination changes
   useEffect(() => {
     fetchClients();
-  }, [fetchClients]);
+  }, [fetchClients, debouncedSearchTerm]);
 
   // Filter clients based on search term
   const filteredClients = state.clients.filter(
@@ -132,9 +171,20 @@ const Clients = () => {
     return new Date(dateString).toLocaleDateString();
   };
 
-  // Handle search term change
+  // Handle search input change
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     dispatch({ type: "SET_SEARCH_TERM", payload: e.target.value });
+  };
+
+  // Clear search
+  const handleClearSearch = () => {
+    dispatch({ type: "SET_SEARCH_TERM", payload: "" });
+  };
+
+  // Handle page change
+  const handlePageChange = (page: number) => {
+    const newPagination = { ...state.pagination, page };
+    dispatch({ type: "SET_PAGINATION", payload: newPagination });
   };
 
   // Handle opening the modal for adding a new client
@@ -248,116 +298,158 @@ const Clients = () => {
           <FiPlus className="mr-2" /> Add Client
         </button>
       </div>
-
-      {/* Search bar */}
+      
+      {/* Search and filter section */}
       <div className="mb-6">
         <div className="relative">
+          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+            <FiSearch className="text-gray-400" />
+          </div>
           <input
             type="text"
-            placeholder="Search clients..."
+            placeholder="Search clients by name, email, phone or company..."
+            className="w-full pl-10 pr-10 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500"
             value={state.searchTerm}
             onChange={handleSearchChange}
-            className="w-full p-3 pl-10 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:border-gray-700 dark:text-white"
           />
-          <FiSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+          {state.searchTerm && (
+            <button
+              className="absolute inset-y-0 right-0 pr-3 flex items-center"
+              onClick={handleClearSearch}
+            >
+              <FiX className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300" />
+            </button>
+          )}
         </div>
       </div>
 
       {/* Client list */}
-      {state.isLoading ? (
-        <div className="text-center py-8">
-          <p className="text-gray-500 dark:text-gray-400">Loading clients...</p>
-        </div>
-      ) : filteredClients.length === 0 ? (
-        <div className="text-center py-8">
-          <p className="text-gray-500 dark:text-gray-400">
-            {state.searchTerm
-              ? "No clients match your search criteria."
-              : "No clients found. Add your first client!"}
-          </p>
-        </div>
-      ) : (
-        <div className="overflow-x-auto bg-white dark:bg-gray-800 rounded-lg shadow">
-          <table className="w-full border-collapse">
-            <thead>
-              <tr className="bg-gray-100 dark:bg-gray-700">
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                  Name
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                  Email
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                  Phone
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                  Company
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                  Status
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                  Created
-                </th>
-                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
-                  Actions
-                </th>
-              </tr>
-            </thead>
-            <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
-              {filteredClients.map((client) => (
-                <tr
-                  key={client.id}
-                  className="hover:bg-gray-50 dark:hover:bg-gray-700"
-                >
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="font-medium text-gray-900 dark:text-white">
-                      {client.name}
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                    {client.email}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                    {client.phone}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                    {client.company}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <span
-                      className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                        client?.status === "Active"
-                          ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200"
-                          : "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200"
-                      }`}
-                    >
-                      {client?.status || "Active"}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
-                    {formatDate(client.createdAt)}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                    <button
-                      className="text-blue-600 dark:text-blue-400 hover:text-blue-900 dark:hover:text-blue-300 mr-3"
-                      onClick={() => handleEditClient(client)}
-                    >
-                      <FiEdit2 className="h-4 w-4" />
-                    </button>
-                    <button
-                      className="text-red-600 dark:text-red-400 hover:text-red-900 dark:hover:text-red-300"
-                      onClick={() => handleDeleteClient(client.id)}
-                    >
-                      <FiTrash2 className="h-4 w-4" />
-                    </button>
-                  </td>
+      <div className="bg-white dark:bg-gray-800 shadow-md rounded-lg overflow-hidden">
+        {state.isLoading ? (
+          <div className="p-6 text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto"></div>
+            <p className="mt-4 text-gray-600 dark:text-gray-400">
+              Loading clients...
+            </p>
+          </div>
+        ) : state.error ? (
+          <div className="p-6 text-center">
+            <p className="text-red-500">{state.error}</p>
+            <button
+              onClick={fetchClients}
+              className="mt-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+            >
+              Try Again
+            </button>
+          </div>
+        ) : state.clients.length === 0 ? (
+          <div className="p-6 text-center">
+            <p className="text-gray-600 dark:text-gray-400">
+              {state.searchTerm 
+                ? `No clients found matching "${state.searchTerm}". Try a different search term or` 
+                : "No clients found."}
+              <button
+                onClick={handleAddClient}
+                className="text-blue-500 hover:underline ml-1"
+              >
+                add a new client
+              </button>
+              .
+            </p>
+          </div>
+        ) : (
+          <div>
+            <table className="w-full border-collapse">
+              <thead>
+                <tr className="bg-gray-100 dark:bg-gray-700">
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                    Name
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                    Email
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                    Phone
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                    Company
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                    Status
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                    Created
+                  </th>
+                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">
+                    Actions
+                  </th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      )}
+              </thead>
+              <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+                {filteredClients.map((client) => (
+                  <tr
+                    key={client.id}
+                    className="hover:bg-gray-50 dark:hover:bg-gray-700"
+                  >
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="font-medium text-gray-900 dark:text-white">
+                        {client.name}
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
+                      {client.email}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
+                      {client.phone}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
+                      {client.company}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <span
+                        className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                          client?.status === "Active"
+                            ? "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200"
+                            : "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200"
+                        }`}
+                      >
+                        {client?.status || "Active"}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
+                      {formatDate(client.createdAt)}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                      <button
+                        className="text-blue-600 dark:text-blue-400 hover:text-blue-900 dark:hover:text-blue-300 mr-3"
+                        onClick={() => handleEditClient(client)}
+                      >
+                        <FiEdit2 className="h-4 w-4" />
+                      </button>
+                      <button
+                        className="text-red-600 dark:text-red-400 hover:text-red-900 dark:hover:text-red-300"
+                        onClick={() => handleDeleteClient(client.id)}
+                      >
+                        <FiTrash2 className="h-4 w-4" />
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+            {/* Pagination */}
+            {!state.isLoading && !state.error && state.clients.length > 0 && (
+              <Pagination
+                currentPage={state.pagination.page}
+                totalPages={state.pagination.totalPages}
+                onPageChange={handlePageChange}
+                totalItems={state.pagination.totalCount}
+                itemsPerPage={state.pagination.limit}
+              />
+            )}
+          </div>
+        )}
+      </div>
 
       {/* Client Form Modal */}
       <Modal
