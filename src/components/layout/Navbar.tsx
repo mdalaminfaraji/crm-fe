@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { FiMenu, FiBell, FiUser, FiLogOut, FiSettings } from 'react-icons/fi';
-import ThemeToggle from '../common/ThemeToggle';
+// import ThemeToggle from '../common/ThemeToggle';
 import { useAuth } from '../../hooks/useAuth';
 
 interface NavbarProps {
@@ -9,7 +9,7 @@ interface NavbarProps {
   isMobile: boolean;
 }
 
-const Navbar = ({ toggleSidebar, isMobile }: NavbarProps) => {
+const Navbar = ({ toggleSidebar }: NavbarProps) => {
   const [profileOpen, setProfileOpen] = useState(false);
   const [notificationsOpen, setNotificationsOpen] = useState(false);
   const { user, logout } = useAuth();
@@ -55,7 +55,7 @@ const Navbar = ({ toggleSidebar, isMobile }: NavbarProps) => {
 
         <div className="flex items-center space-x-2 md:space-x-4">
           {/* Dark mode toggle - hide on mobile */}
-          <ThemeToggle className={isMobile ? 'hidden' : 'flex'} />
+          {/* <ThemeToggle className={isMobile ? 'hidden' : 'flex'} />
 
           {/* Notifications */}
           <div className="relative" ref={notificationsRef}>
@@ -124,12 +124,12 @@ const Navbar = ({ toggleSidebar, isMobile }: NavbarProps) => {
                   Settings
                 </Link>
                 {/* Show theme toggle on mobile */}
-                {isMobile && (
+                {/* {isMobile && (
                   <div className="px-4 py-2 flex items-center justify-between border-t border-gray-200 dark:border-gray-700">
                     <span className="text-sm text-gray-700 dark:text-gray-300">Dark Mode</span>
                     <ThemeToggle />
                   </div>
-                )}
+                )} */}
                 <button
                   onClick={() => {
                     setProfileOpen(false);

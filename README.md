@@ -64,12 +64,14 @@ src/
 ### Installation
 
 1. Clone the repository
+
    ```bash
    git clone https://github.com/mdalaminfaraji/crm-fe.git
    cd crm-fe
    ```
 
 2. Install dependencies
+
    ```bash
    npm install
    # or
@@ -77,11 +79,13 @@ src/
    ```
 
 3. Create a `.env` file in the root directory with the following variables:
+
    ```
    VITE_API_URL=http://localhost:5000
    ```
 
 4. Start the development server
+
    ```bash
    npm run dev
    # or
@@ -146,6 +150,7 @@ The application uses JWT-based authentication with token refresh capabilities. A
 ### Dashboard
 
 The dashboard provides a quick overview of key metrics including:
+
 - Total clients and projects
 - Projects by status (visual representation)
 - Upcoming reminders
@@ -158,6 +163,7 @@ Comprehensive client management with search, filtering, and pagination capabilit
 ### Project Management
 
 Track projects with details such as:
+
 - Project status (Not Started, In Progress, On Hold, Completed, Cancelled)
 - Budget and actual costs
 - Start and end dates
@@ -166,6 +172,7 @@ Track projects with details such as:
 ### Interactions
 
 Log all client interactions with:
+
 - Interaction type (Call, Email, Meeting, etc.)
 - Date and time
 - Notes
@@ -174,16 +181,8 @@ Log all client interactions with:
 ### Reminders
 
 Set reminders for follow-ups with:
+
 - Due date and time
 - Priority level
 - Description
 - Associated client and/or project
-
-## Contributing
-
-Contributions are welcome! Please feel free to submit a Pull Request.
-
-## License
-
-This project is licensed under the MIT License - see the LICENSE file for details.
-
